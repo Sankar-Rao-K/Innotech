@@ -1,0 +1,6 @@
+{
+  "name": "InnoTech BioPharm Solutions",
+  "description": "Comprehensive Chemistry, Manufacturing, and Controls (CMC) solutions for the biopharmaceutical industry. Formulation, analytical development, scale-up, and regulatory CMC strategy.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

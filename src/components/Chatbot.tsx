@@ -1,335 +1,126 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { 
-  MessageSquare, 
-  X, 
-  Send, 
-  MessageCircle, 
-  ArrowRight, 
-  RotateCcw,
-  Sparkles,
-  ExternalLink
-} from 'lucide-react';
-import { processUserQuery, ChatMessage, resetSessionContext } from '../utils/chatbotEngine';
+import React, { useEffect, useRef, useState } from 'react';
+import { MessageCircle, RotateCcw, Send, X, ArrowRight, Bot } from 'lucide-react';
+import { processUserQuery, resetSessionContext, WELCOME, ChatMessage, ChatAction } from '../utils/chatbotEngine';
 
-interface ChatbotProps {
-  navigate: (route: string) => void;
-  openConsultationModal?: () => void;
-}
+interface ChatbotProps { navigate: (route: string) => void; openConsultationModal?: () => void }
+
+/** Minimal rich text: **bold**, "• " bullets, line breaks, auto-linked emails and phone numbers. */
+const Rich: React.FC<{ text: string }> = ({ text }) => {
+  const inline = (s: string, key: string) =>
+    s.split(/(\*\*[^*]+\*\*|[\w.+-]+@[\w-]+\.[\w.]+|\+\d[\d\s()-]{8,}\d)/g).map((part, i) => {
+      if (/^\*\*.*\*\*$/.test(part)) return <strong key={key + i}>{part.slice(2, -2)}</strong>;
+      if (/^[\w.+-]+@[\w-]+\.[\w.]+$/.test(part)) return <a key={key + i} href={`mailto:${part}`} className="underline font-semibold break-all">{part}</a>;
+      if (/^\+\d/.test(part)) return <a key={key + i} href={`tel:${part.replace(/[^\d+]/g, '')}`} className="underline font-semibold whitespace-nowrap">{part}</a>;
+      return <React.Fragment key={key + i}>{part}</React.Fragment>;
+    });
+  return (
+    <>
+      {text.split('\n').map((line, i) =>
+        line.startsWith('• ')
+          ? <div key={i} className="flex gap-2 pl-1"><span aria-hidden="true">•</span><span>{inline(line.slice(2), `l${i}`)}</span></div>
+          : line === '' ? <div key={i} className="h-2" /> : <div key={i}>{inline(line, `l${i}`)}</div>
+      )}
+    </>
+  );
+};
+
+const fresh = (): ChatMessage => ({ ...WELCOME, id: `welcome-${Date.now()}`, timestamp: new Date() });
 
 export const Chatbot: React.FC<ChatbotProps> = ({ navigate, openConsultationModal }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>(() => [
-    {
-      id: 'welcome-msg',
-      sender: 'bot',
-      text: "Hello! Welcome to InnoTech BioPharm Solutions. I'm your website customer care assistant. I can help you learn about our CMC services, formulation development, analytical testing, scale-up capabilities, and connect you directly with our technical leadership. How can I help you today?",
-      timestamp: new Date(),
-      suggestions: [
-        "What services do you offer?",
-        "What is CMC?",
-        "Formulation Development",
-        "How can I get a quote?",
-        "Contact the team"
-      ]
-    }
-  ]);
-  const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [typing, setTyping] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [fresh()]);
+  const [seenLauncher, setSeenLauncher] = useState(false);
+  const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
+  useEffect(() => { if (open) endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [open, messages, typing]);
   useEffect(() => {
-    if (isOpen) {
-      scrollToBottom();
-      // Auto focus input on desktop
-      if (window.innerWidth >= 768) {
-        setTimeout(() => inputRef.current?.focus(), 150);
-      }
-    }
-  }, [isOpen, messages, isTyping]);
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('keydown', onKey);
+    const mobile = window.matchMedia('(max-width: 639px)').matches;
+    const prev = document.body.style.overflow;
+    if (mobile) document.body.style.overflow = 'hidden';
+    else setTimeout(() => inputRef.current?.focus(), 120);
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+  }, [open]);
 
-  const handleSend = (userText: string) => {
-    const trimmed = userText.trim();
-    if (!trimmed) return;
-
-    const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
-      sender: 'user',
-      text: trimmed,
-      timestamp: new Date()
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
+  const send = (raw: string) => {
+    const text = raw.trim();
+    if (!text || typing) return;
+    setMessages(m => [...m, { id: `u-${Date.now()}`, sender: 'user', text, timestamp: new Date() }]);
     setInput('');
-    setIsTyping(true);
-
-    // Realistic human-paced customer-care response (180ms - 320ms)
-    setTimeout(() => {
-      const botResponse = processUserQuery(trimmed);
-      setMessages((prev) => [...prev, botResponse]);
-      setIsTyping(false);
-    }, 240);
+    setTyping(true);
+    setTimeout(() => { setMessages(m => [...m, processUserQuery(text)]); setTyping(false); }, 450);
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
-    handleSend(suggestion);
-  };
-
-  const handleReset = () => {
-    resetSessionContext();
-    setMessages([
-      {
-        id: `welcome-${Date.now()}`,
-        sender: 'bot',
-        text: "Conversation refreshed. I'm ready to assist you with information about our CMC services, formulation science, or connecting with our team. What would you like to explore?",
-        timestamp: new Date(),
-        suggestions: [
-          "What services do you offer?",
-          "What is CMC?",
-          "How can I get a quote?",
-          "Contact the team"
-        ]
-      }
-    ]);
-  };
-
-  const handleActionClick = (message: ChatMessage) => {
-    if (!message.action) return;
-    if (message.action.type === 'whatsapp' && message.action.url) {
-      window.open(message.action.url, '_blank', 'noopener,noreferrer');
-    } else if (message.action.type === 'route' && message.action.route) {
-      navigate(message.action.route);
-      setIsOpen(false);
-    } else if (message.action.type === 'consultation' && openConsultationModal) {
-      openConsultationModal();
-      setIsOpen(false);
+  const run = (a: ChatAction) => {
+    if (a.type === 'route' && a.route) { navigate(a.route); setOpen(false); }
+    else if (a.type === 'consultation') { openConsultationModal?.(); setOpen(false); }
+    else if (a.type === 'link' && a.url) {
+      if (a.url.startsWith('http')) window.open(a.url, '_blank', 'noopener,noreferrer'); else window.location.href = a.url;
     }
   };
+
+  const reset = () => { resetSessionContext(); setMessages([fresh()]); setTyping(false); };
+  const lastBotId = [...messages].reverse().find(m => m.sender === 'bot')?.id;
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 font-sans print:hidden">
-      {/* Floating Launcher Button */}
-      {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          aria-label="Open InnoTech BioPharm Customer Care"
-          className="group flex items-center gap-2.5 bg-[#2F9FEA] hover:bg-[#2389D2] active:bg-[#1E77B8] text-white p-3.5 sm:px-4 sm:py-3 rounded-full shadow-lg border border-[#A6D8FA] transition-all duration-200 hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-[#2F9FEA] focus:ring-offset-2"
-        >
-          <div className="relative">
-            <MessageSquare className="w-5 h-5 sm:w-5 sm:h-5 text-white" />
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full border border-[#2F9FEA]" />
-          </div>
-          <span className="hidden sm:inline text-xs font-extrabold tracking-wide">
-            Customer Care
-          </span>
+    <div className="print:hidden font-sans">
+      {!open && (
+        <button onClick={() => { setOpen(true); setSeenLauncher(true); }} aria-label="Open InnoTech assistant"
+          className={`fixed z-[65] bottom-4 right-4 sm:bottom-6 sm:right-6 flex items-center gap-2 rounded-full bg-[#0B3C8C] hover:bg-[#092f6f] text-white shadow-xl px-4 py-3.5 transition active:scale-95 ${seenLauncher ? '' : 'anim-pulse-ring'}`}>
+          <MessageCircle className="w-6 h-6" /><span className="hidden sm:inline text-sm font-bold">Ask InnoTech</span>
         </button>
       )}
 
-      {/* Chat Window */}
-      {isOpen && (
-        <div 
-          role="dialog"
-          aria-modal="true"
-          aria-label="InnoTech BioPharm Customer Care"
-          className="bg-white rounded-2xl border border-[#D7EAF7] shadow-2xl flex flex-col w-[calc(100vw-28px)] sm:w-[390px] h-[580px] max-h-[82vh] overflow-hidden transition-all duration-200 animate-in fade-in slide-in-from-bottom-3"
-        >
-          {/* Header */}
-          <div className="bg-[#F5FAFE] border-b border-[#D7EAF7] p-4 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-[#2F9FEA] flex items-center justify-center text-white shrink-0 shadow-xs">
-                <MessageSquare className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <h3 className="font-extrabold text-sm text-[#123B5D] leading-tight">
-                    InnoTech BioPharm
-                  </h3>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" title="Online" />
-                </div>
-                <div className="text-[11px] text-[#536B7D] font-medium leading-tight">
-                  Customer Care &bull; Website Assistant
-                </div>
-              </div>
-            </div>
+      {open && (
+        <div role="dialog" aria-label="InnoTech assistant" className="fixed z-[70] inset-0 sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[400px] sm:h-[620px] sm:max-h-[calc(100dvh-3rem)] bg-white sm:rounded-2xl shadow-2xl border border-[#D7EAF7] flex flex-col overflow-hidden h-[100dvh] sm:h-[620px]">
+          <header className="flex items-center gap-3 bg-gradient-to-r from-[#0B2A5B] to-[#0F4C8A] text-white px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15"><Bot className="w-5 h-5" /></span>
+            <div className="flex-1 min-w-0"><p className="font-extrabold leading-tight">InnoTech Assistant</p><p className="text-[11px] text-blue-200 truncate">Services · Frameworks · Insights · Contact</p></div>
+            <button onClick={reset} aria-label="Restart conversation" className="p-2 rounded-full hover:bg-white/15"><RotateCcw className="w-4 h-4" /></button>
+            <button onClick={() => setOpen(false)} aria-label="Close chat" className="p-2 rounded-full hover:bg-white/15"><X className="w-5 h-5" /></button>
+          </header>
 
-            <div className="flex items-center gap-1">
-              <button
-                onClick={handleReset}
-                title="Restart conversation"
-                aria-label="Restart conversation"
-                className="p-1.5 rounded-lg text-[#536B7D] hover:text-[#123B5D] hover:bg-[#EAF6FD] transition-colors"
-              >
-                <RotateCcw className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setIsOpen(false)}
-                title="Close chat window"
-                aria-label="Close chat window"
-                className="p-1.5 rounded-lg text-[#536B7D] hover:text-[#123B5D] hover:bg-[#EAF6FD] transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Subheader Transparency Notice */}
-          <div className="bg-[#EAF6FD] px-3.5 py-1.5 border-b border-[#D7EAF7] text-[10px] text-[#123B5D] flex items-center gap-1.5 font-medium shrink-0">
-            <Sparkles className="w-3 h-3 text-[#2F9FEA] shrink-0" />
-            <span>Official website assistant &bull; Direct technical inquiries</span>
-          </div>
-
-          {/* Messages Scroll Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs bg-white">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
-              >
-                {/* Speech Bubble */}
-                <div
-                  className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 leading-relaxed whitespace-pre-wrap ${
-                    msg.sender === 'user'
-                      ? 'bg-[#2F9FEA] text-white rounded-br-xs font-medium'
-                      : 'bg-[#F5FAFE] text-[#123B5D] border border-[#D7EAF7] rounded-bl-xs'
-                  }`}
-                >
-                  {/* Format bold markdown cleanly */}
-                  {msg.text.split('\n').map((line, idx) => {
-                    if (!line) return <div key={idx} className="h-1.5" />;
-                    return (
-                      <p key={idx} className="mb-1 last:mb-0">
-                        {line.split(/(\*\*.*?\*\*)/g).map((chunk, i) => {
-                          if (chunk.startsWith('**') && chunk.endsWith('**')) {
-                            return (
-                              <strong key={i} className="font-extrabold text-[#123B5D]">
-                                {chunk.slice(2, -2)}
-                              </strong>
-                            );
-                          }
-                          return chunk;
-                        })}
-                      </p>
-                    );
-                  })}
-                </div>
-
-                {/* Primary Action Button (e.g. WhatsApp or Route Navigation) */}
-                {msg.action && (
-                  <div className="mt-2 w-full max-w-[85%]">
-                    {msg.action.type === 'whatsapp' ? (
-                      <button
-                        onClick={() => handleActionClick(msg)}
-                        className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20BA5A] active:bg-[#1DA851] text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl shadow-xs transition-all duration-200 hover:-translate-y-[1px]"
-                      >
-                        <MessageCircle className="w-4 h-4 text-white shrink-0 fill-current" />
-                        <span>{msg.action.label}</span>
-                        <ExternalLink className="w-3 h-3 text-white/80" />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleActionClick(msg)}
-                        className="w-full flex items-center justify-center gap-1.5 bg-[#2F9FEA] hover:bg-[#2389D2] text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition-all duration-200"
-                      >
-                        <span>{msg.action.label}</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    )}
+          <div className="flex-1 overflow-y-auto bg-[#F5FAFE] px-3 py-4 space-y-3" role="log" aria-live="polite">
+            {messages.map(m => (
+              <div key={m.id} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[88%] ${m.sender === 'user' ? '' : 'w-full'}`}>
+                  <div className={`rounded-2xl px-3.5 py-2.5 text-[14px] leading-relaxed shadow-sm ${m.sender === 'user' ? 'bg-[#0B3C8C] text-white rounded-br-sm ml-auto w-fit' : 'bg-white text-[#123B5D] border border-[#D7EAF7] rounded-bl-sm'}`}>
+                    {m.sender === 'user' ? m.text : <Rich text={m.text} />}
                   </div>
-                )}
-
-                {/* Quick Follow-Up Suggestion Chips */}
-                {msg.suggestions && msg.suggestions.length > 0 && (
-                  <div className="mt-2.5 flex flex-wrap gap-1.5">
-                    {msg.suggestions.map((sug, i) => (
-                      <button
-                        key={i}
-                        onClick={() => handleSuggestionClick(sug)}
-                        className="text-[11px] font-bold text-[#123B5D] bg-[#F5FAFE] hover:bg-[#EAF6FD] hover:text-[#2F9FEA] hover:border-[#2F9FEA] px-2.5 py-1 rounded-lg border border-[#D7EAF7] transition-all text-left"
-                      >
-                        {sug}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* Timestamp */}
-                <span className="text-[10px] text-[#536B7D] mt-1 px-1">
-                  {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
+                  {m.actions && m.actions.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {m.actions.map(a => (
+                        <button key={a.label} onClick={() => run(a)} className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2">{a.label}<ArrowRight className="w-3.5 h-3.5" /></button>
+                      ))}
+                    </div>
+                  )}
+                  {m.id === lastBotId && m.suggestions && !typing && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {m.suggestions.map(s => <button key={s} onClick={() => send(s)} className="rounded-full border border-blue-300 bg-white text-blue-700 hover:bg-blue-50 text-xs font-semibold px-3 py-1.5">{s}</button>)}
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
-
-            {/* Typing Indicator */}
-            {isTyping && (
-              <div className="flex items-start">
-                <div className="bg-[#F5FAFE] border border-[#D7EAF7] rounded-2xl rounded-bl-xs px-3 py-2 text-[#536B7D] flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-[#2F9FEA] rounded-full animate-pulse" />
-                  <span className="w-1.5 h-1.5 bg-[#2F9FEA] rounded-full animate-pulse [animation-delay:150ms]" />
-                  <span className="w-1.5 h-1.5 bg-[#2F9FEA] rounded-full animate-pulse [animation-delay:300ms]" />
-                </div>
-              </div>
+            {typing && (
+              <div className="flex" aria-label="Assistant is typing"><div className="rounded-2xl rounded-bl-sm bg-white border border-[#D7EAF7] px-4 py-3 flex gap-1">
+                {[0, 1, 2].map(i => <span key={i} className="h-2 w-2 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: `${i * 140}ms` }} />)}
+              </div></div>
             )}
-
-            <div ref={messagesEndRef} />
+            <div ref={endRef} />
           </div>
 
-          {/* Quick Action Dock */}
-          <div className="px-3 py-2 bg-[#F5FAFE] border-t border-[#D7EAF7] flex items-center gap-2 overflow-x-auto text-[11px] shrink-0">
-            <button
-              onClick={() => handleSend("What services do you provide?")}
-              className="whitespace-nowrap px-2.5 py-1 rounded-md bg-white border border-[#D7EAF7] text-[#123B5D] hover:text-[#2F9FEA] font-bold transition-colors"
-            >
-              Services
-            </button>
-            <button
-              onClick={() => handleSend("What is CMC?")}
-              className="whitespace-nowrap px-2.5 py-1 rounded-md bg-white border border-[#D7EAF7] text-[#123B5D] hover:text-[#2F9FEA] font-bold transition-colors"
-            >
-              What is CMC?
-            </button>
-            <button
-              onClick={() => handleSend("How can I get a quote?")}
-              className="whitespace-nowrap px-2.5 py-1 rounded-md bg-white border border-[#D7EAF7] text-[#2F9FEA] hover:bg-[#EAF6FD] font-extrabold transition-colors flex items-center gap-1"
-            >
-              <MessageCircle className="w-3 h-3 text-[#25D366]" />
-              <span>Get a Quote</span>
-            </button>
-            <button
-              onClick={() => handleSend("Who is Raj Thota?")}
-              className="whitespace-nowrap px-2.5 py-1 rounded-md bg-white border border-[#D7EAF7] text-[#123B5D] hover:text-[#2F9FEA] font-bold transition-colors"
-            >
-              Founder
-            </button>
-          </div>
-
-          {/* Chat Input Field */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSend(input);
-            }}
-            className="p-3 bg-white border-t border-[#D7EAF7] flex items-center gap-2 shrink-0"
-          >
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask us about our services, CMC, pricing..."
-              className="flex-1 bg-[#F5FAFE] border border-[#D7EAF7] rounded-xl px-3.5 py-2.5 text-xs text-[#123B5D] placeholder-[#536B7D] focus:outline-none focus:ring-1 focus:ring-[#2F9FEA] focus:border-[#2F9FEA]"
-            />
-            <button
-              type="submit"
-              disabled={!input.trim()}
-              aria-label="Send message"
-              className="w-9 h-9 rounded-xl bg-[#2F9FEA] hover:bg-[#2389D2] active:bg-[#1E77B8] disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center shrink-0 transition-colors shadow-xs"
-            >
-              <Send className="w-4 h-4" />
-            </button>
+          <form onSubmit={e => { e.preventDefault(); send(input); }} className="flex gap-2 border-t border-[#D7EAF7] bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <label className="flex-1"><span className="sr-only">Type your question</span>
+              <input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} placeholder="Ask about services, frameworks, papers…" maxLength={300} enterKeyHint="send"
+                className="w-full rounded-full border border-[#D7EAF7] bg-[#F5FAFE] px-4 py-2.5 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </label>
+            <button type="submit" disabled={!input.trim() || typing} aria-label="Send message" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#0B3C8C] text-white disabled:opacity-40"><Send className="w-4 h-4" /></button>
           </form>
         </div>
       )}

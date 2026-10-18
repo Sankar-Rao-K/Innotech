@@ -1,141 +1,90 @@
-import React, { useState } from 'react';
-import { X, Search, FlaskConical, Dna, FileText } from 'lucide-react';
-import { SERVICES_DATA, EXPERTISE_DATA, BLOG_POSTS } from '../data/siteData';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Search, X, FileText, LayoutGrid } from 'lucide-react';
+import { PUBLICATIONS } from '../data/publications';
 
-interface SearchModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  navigate: (route: string) => void;
-}
+interface Props { isOpen: boolean; onClose: () => void; navigate: (route: string) => void }
+interface Item { title: string; desc: string; route: string; kind: 'Page' | 'Service' | 'Publication'; keys: string }
 
-export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, navigate }) => {
-  const [query, setQuery] = useState('');
+const PAGES: Item[] = [
+  { title: 'Home', desc: 'Commercialization advisory overview', route: '/', kind: 'Page', keys: 'home overview start' },
+  { title: 'About InnoTech', desc: 'Philosophy, how we work and our commitment', route: '/about-us', kind: 'Page', keys: 'about philosophy commitment how we work' },
+  { title: 'Raj Thota, Founder', desc: 'Career, executive expertise and thought leadership', route: '/our-founder', kind: 'Page', keys: 'founder raj thota leadership career fda approvals' },
+  { title: 'Who We Work With', desc: 'Organizations we support and how we partner', route: '/our-partners', kind: 'Page', keys: 'clients organizations partner cdmo investors startups engage' },
+  { title: 'Expertise', desc: 'CMC, MS&T, tech transfer, validation, specialized products, AI, due diligence', route: '/our-expertise', kind: 'Page', keys: 'expertise cmc late stage ms&t technical operations transfer validation specialized ai due diligence' },
+  { title: 'Services', desc: 'Seven advisory services and engagement models', route: '/our-services', kind: 'Page', keys: 'services assessment readiness technology transfer ppq launch lai ophthalmic ai digital recovery engagement' },
+  { title: 'Frameworks & Executive Tools', desc: 'Enterprise framework, library, readiness scale, AI frameworks', route: '/frameworks', kind: 'Page', keys: 'framework library readiness scale scorecard roadmap inspection governance ai frameworks' },
+  { title: 'Executive Insights', desc: 'White papers, blogs and learning series', route: '/insights', kind: 'Page', keys: 'insights publications white paper blog resources learning series qbd' },
+  { title: 'Contact', desc: 'Request an initial discussion', route: '/contact-us', kind: 'Page', keys: 'contact email phone address discussion form quote' },
+  { title: 'Privacy Policy', desc: 'How information is handled', route: '/privacy-policy', kind: 'Page', keys: 'privacy data policy' },
+  { title: 'Terms & Conditions', desc: 'Website terms of use', route: '/terms-and-conditions', kind: 'Page', keys: 'terms conditions legal' },
+];
+const SERVICES: Item[] = [
+  ['Commercialization Readiness Assessments', 'CMC, tech transfer, manufacturing, PPQ and launch readiness reviews'],
+  ['Technology Transfer & Commercialization Execution', 'Sending-site to receiving-site capability'],
+  ['MS&T & Technical Operations Transformation', 'Process stewardship, CPV and technical governance'],
+  ['Validation, PPQ & Technical Launch', 'From process understanding to initial commercial supply'],
+  ['Specialized Products & Delivery Systems', 'Oral, ophthalmic, injectable, LAI and combination products'],
+  ['AI & Digital Transformation', 'AI-assisted QbD, digital twins, MES and Good AI Practice'],
+  ['Executive Advisory, Due Diligence & Recovery', 'Independent clarity for leaders, boards and investors'],
+].map(([title, desc]) => ({ title, desc, route: '/our-services', kind: 'Service' as const, keys: title + ' ' + desc }));
+const PUBS: Item[] = PUBLICATIONS.map(p => ({ title: p.title, desc: `${p.type} · ${p.summary}`, route: `/insights/${p.slug}`, kind: 'Publication' as const, keys: p.topics.join(' ') + ' ' + p.takeaways.join(' ') }));
+const INDEX = [...PAGES, ...SERVICES, ...PUBS];
+const QUICK = ['technology transfer', 'PPQ', 'framework', 'LAI', 'solubility', 'CDMO'];
+
+export const SearchModal: React.FC<Props> = ({ isOpen, onClose, navigate }) => {
+  const [q, setQ] = useState('');
+  const ref = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    setQ('');
+    setTimeout(() => ref.current?.focus(), 50);
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow; document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+  }, [isOpen, onClose]);
+
+  const results = useMemo(() => {
+    const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!terms.length) return [];
+    return INDEX.map(it => {
+      const t = it.title.toLowerCase(), rest = (it.desc + ' ' + it.keys).toLowerCase();
+      let s = 0;
+      for (const w of terms) { if (t.includes(w)) s += 3; else if (rest.includes(w)) s += 1; else return { it, s: 0 }; }
+      return { it, s };
+    }).filter(r => r.s > 0).sort((a, b) => b.s - a.s).slice(0, 12).map(r => r.it);
+  }, [q]);
 
   if (!isOpen) return null;
-
-  const handleSelect = (route: string) => {
-    navigate(route);
-    onClose();
-  };
-
-  const filteredServices = SERVICES_DATA.filter(s => 
-    s.title.toLowerCase().includes(query.toLowerCase()) || 
-    s.shortDesc.toLowerCase().includes(query.toLowerCase())
-  );
-
-  const filteredExpertise = EXPERTISE_DATA.filter(e => 
-    e.title.toLowerCase().includes(query.toLowerCase()) || 
-    e.description.toLowerCase().includes(query.toLowerCase())
-  );
-
-  const filteredBlogs = BLOG_POSTS.filter(b => 
-    b.title.toLowerCase().includes(query.toLowerCase()) || 
-    b.summary.toLowerCase().includes(query.toLowerCase())
-  );
-
+  const go = (route: string) => { navigate(route); onClose(); };
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-[#123B5D]/40 backdrop-blur-xs transition-opacity duration-200">
-      <div className="bg-white rounded-xl shadow-xl max-w-xl w-full overflow-hidden border border-[#D7EAF7] max-h-[80vh] flex flex-col transition-all duration-200">
-        
-        {/* Search Bar Input */}
-        <div className="p-3.5 border-b border-[#D7EAF7] flex items-center gap-3 bg-[#F5FAFE]">
-          <Search className="w-4 h-4 text-[#2F9FEA] shrink-0" />
-          <input
-            type="text"
-            autoFocus
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search services, expertise, frameworks, insights..."
-            className="w-full text-xs bg-transparent border-none focus:outline-none text-[#123B5D] placeholder-[#536B7D]"
-          />
-          <button
-            onClick={onClose}
-            className="p-1 rounded-full text-[#536B7D] hover:text-[#123B5D] hover:bg-[#EAF6FD] transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
+    <div className="fixed inset-0 z-[80] bg-[#123B5D]/50 flex items-start justify-center sm:pt-20" role="dialog" aria-modal="true" aria-label="Search the site" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="bg-white w-full sm:max-w-2xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[100dvh] sm:max-h-[75vh] h-[100dvh] sm:h-auto">
+        <div className="flex items-center gap-3 border-b border-[#D7EAF7] px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+          <Search className="w-5 h-5 text-slate-400 shrink-0" />
+          <input ref={ref} value={q} onChange={e => setQ(e.target.value)} placeholder="Search services, frameworks, publications…" aria-label="Search" className="flex-1 text-base outline-none" />
+          <button onClick={onClose} aria-label="Close search" className="p-2 rounded-full hover:bg-slate-100"><X className="w-5 h-5" /></button>
         </div>
-
-        {/* Search Results */}
-        <div className="p-4 overflow-y-auto space-y-4 max-h-[60vh]">
-          {query.trim() === '' ? (
-            <div className="text-center py-8 text-[#536B7D] text-xs">
-              Type keywords like <span className="font-semibold text-[#2F9FEA]">"LAI"</span>, <span className="font-semibold text-[#2F9FEA]">"Formulation"</span>, <span className="font-semibold text-[#2F9FEA]">"QbD"</span>, or <span className="font-semibold text-[#2F9FEA]">"Regulatory"</span> to search across the site.
+        <div className="overflow-y-auto p-3">
+          {!q.trim() ? (
+            <div className="p-2"><p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Try searching for</p>
+              <div className="flex flex-wrap gap-2">{QUICK.map(t => <button key={t} onClick={() => setQ(t)} className="rounded-full bg-[#EAF6FD] px-3 py-1.5 text-sm font-semibold text-[#123B5D]">{t}</button>)}</div>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mt-5 mb-2">Jump to</p>
+              <ul>{PAGES.slice(1, 9).map(p => <li key={p.route}><button onClick={() => go(p.route)} className="w-full text-left rounded-lg px-3 py-2.5 hover:bg-[#F5FAFE] text-sm font-semibold text-[#123B5D]">{p.title}</button></li>)}</ul>
             </div>
+          ) : results.length === 0 ? (
+            <p className="p-6 text-center text-sm text-slate-500">No results for “{q}”. Try a different word, or <button onClick={() => go('/contact-us')} className="font-bold text-blue-700">contact us</button>.</p>
           ) : (
-            <>
-              {filteredServices.length === 0 && filteredExpertise.length === 0 && filteredBlogs.length === 0 && (
-                <div className="text-center py-8 text-[#536B7D] text-xs">
-                  No matching results found for "<span className="font-semibold text-[#123B5D]">{query}</span>".
-                </div>
-              )}
-
-              {filteredServices.length > 0 && (
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#536B7D] block mb-2 px-2">Services</span>
-                  <div className="space-y-1">
-                    {filteredServices.map(s => (
-                      <button
-                        key={s.id}
-                        onClick={() => handleSelect('/our-services')}
-                        className="w-full text-left p-2.5 hover:bg-[#F5FAFE] rounded-lg transition-colors flex items-start gap-2.5 group"
-                      >
-                        <FlaskConical className="w-4 h-4 text-[#2F9FEA] mt-0.5 shrink-0" />
-                        <div>
-                          <div className="font-bold text-[#123B5D] text-xs group-hover:text-[#2F9FEA]">{s.title}</div>
-                          <div className="text-[11px] text-[#536B7D] line-clamp-1">{s.shortDesc}</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {filteredExpertise.length > 0 && (
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#536B7D] block mb-2 px-2">Core Expertise</span>
-                  <div className="space-y-1">
-                    {filteredExpertise.map(e => (
-                      <button
-                        key={e.id}
-                        onClick={() => handleSelect('/our-expertise')}
-                        className="w-full text-left p-2.5 hover:bg-[#F5FAFE] rounded-lg transition-colors flex items-start gap-2.5 group"
-                      >
-                        <Dna className="w-4 h-4 text-[#2F9FEA] mt-0.5 shrink-0" />
-                        <div>
-                          <div className="font-bold text-[#123B5D] text-xs group-hover:text-[#2F9FEA]">{e.title}</div>
-                          <div className="text-[11px] text-[#536B7D] line-clamp-1">{e.description}</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {filteredBlogs.length > 0 && (
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#536B7D] block mb-2 px-2">Blogs &amp; Insights</span>
-                  <div className="space-y-1">
-                    {filteredBlogs.map(b => (
-                      <button
-                        key={b.id}
-                        onClick={() => handleSelect(`/blogs/${b.slug}`)}
-                        className="w-full text-left p-2.5 hover:bg-[#F5FAFE] rounded-lg transition-colors flex items-start gap-2.5 group"
-                      >
-                        <FileText className="w-4 h-4 text-[#2F9FEA] mt-0.5 shrink-0" />
-                        <div>
-                          <div className="font-bold text-[#123B5D] text-xs group-hover:text-[#2F9FEA]">{b.title}</div>
-                          <div className="text-[11px] text-[#536B7D] line-clamp-1">{b.summary}</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
+            <ul>{results.map(r => (
+              <li key={r.route + r.title}>
+                <button onClick={() => go(r.route)} className="w-full text-left flex gap-3 rounded-lg px-3 py-2.5 hover:bg-[#F5FAFE]">
+                  <span className="mt-0.5 text-blue-600 shrink-0">{r.kind === 'Publication' ? <FileText className="w-4 h-4" /> : <LayoutGrid className="w-4 h-4" />}</span>
+                  <span className="min-w-0"><span className="block text-sm font-bold text-[#123B5D]">{r.title}</span><span className="block text-xs text-slate-500 line-clamp-2">{r.desc}</span></span>
+                  <span className="ml-auto shrink-0 text-[10px] font-bold uppercase text-emerald-600">{r.kind}</span>
+                </button>
+              </li>))}</ul>
           )}
         </div>
-
       </div>
     </div>
   );

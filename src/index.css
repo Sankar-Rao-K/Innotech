@@ -299,3 +299,31 @@
     transform: none !important;
   }
 }
+
+/* ==========================================================================
+   Flow animations (scroll-triggered; see components/Flows.tsx)
+   ========================================================================== */
+@keyframes fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes flow-travel { 0% { left: 0; opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { left: 100%; opacity: 0; } }
+@keyframes shimmer { 0% { transform: translateX(-120%); } 100% { transform: translateX(220%); } }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(47,159,234,.55); } 100% { box-shadow: 0 0 0 14px rgba(47,159,234,0); } }
+.anim-fadein { animation: fadein .45s ease both; }
+.anim-travel { animation: flow-travel 3.4s ease-in-out infinite; }
+.anim-shimmer { animation: shimmer 2.6s ease-in-out infinite; }
+.anim-marquee { animation: marquee 32s linear infinite; }
+.anim-marquee:hover { animation-play-state: paused; }
+.anim-spin-slow { animation: spin-slow 14s linear infinite; transform-origin: center; }
+.anim-pulse-ring { animation: pulse-ring 1.8s ease-out infinite; }
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+@keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+@keyframes pop-in { 0% { transform: scale(.4); opacity: 0; } 70% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+.anim-shake { animation: shake .45s ease; }
+.anim-pop { animation: pop-in .5s cubic-bezier(.34,1.56,.64,1) both; }

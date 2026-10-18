@@ -1,13 +1,13 @@
 // Content source for the commercialization-advisory positioning (per client mockups, Web_site_Model_V1)
 export const FRAMEWORK_STAGES = [
-  { stage: 'UNDERSTAND', area: 'Development', color: '#0B3C8C' },
-  { stage: 'BUILD', area: 'CMC', color: '#1E88E5' },
-  { stage: 'TRANSFER', area: 'MS&T', color: '#2E9E4F' },
-  { stage: 'READY', area: 'Engineering', color: '#F5A300' },
-  { stage: 'VALIDATE', area: 'Manufacturing', color: '#F2622A' },
-  { stage: 'LAUNCH', area: 'Quality', color: '#D7263D' },
-  { stage: 'SUPPLY', area: 'Supply Chain', color: '#6A3FB5' },
-  { stage: 'SUSTAIN', area: 'Commercial', color: '#3B2A8C' },
+  { detail: 'Build deep product and process understanding — quality attributes, control strategy and risk — before scale-up decisions are made.', stage: 'UNDERSTAND', area: 'Development', color: '#0B3C8C' },
+  { detail: 'Translate development knowledge into a scalable, controlled and regulatory-ready CMC package.', stage: 'BUILD', area: 'CMC', color: '#1E88E5' },
+  { detail: 'Move knowledge, not just documents, to the receiving site with technical stewardship in place.', stage: 'TRANSFER', area: 'MS&T', color: '#2E9E4F' },
+  { detail: 'Confirm equipment, facility, systems and automation are fit for the process.', stage: 'READY', area: 'Engineering', color: '#F5A300' },
+  { detail: 'Demonstrate reproducible performance through PPQ and process validation.', stage: 'VALIDATE', area: 'Manufacturing', color: '#F2622A' },
+  { detail: 'Align Quality, regulatory and supply so launch is controlled and inspection-ready.', stage: 'LAUNCH', area: 'Quality', color: '#D7263D' },
+  { detail: 'Secure materials, capacity and inventory for reliable commercial supply.', stage: 'SUPPLY', area: 'Supply Chain', color: '#6A3FB5' },
+  { detail: 'Maintain performance through CPV, knowledge updates and lifecycle improvement.', stage: 'SUSTAIN', area: 'Commercial', color: '#3B2A8C' },
 ];
 
 export const PATHWAY = ['Scientific Understanding', 'Process Capability', 'Technology Transfer', 'Manufacturing Readiness', 'Validation', 'Launch', 'Reliable Supply'];
@@ -38,7 +38,6 @@ export const FOUNDER_STATS = [
   ['Nearly Three Decades', 'Development-to-Commercial Lifecycle Experience'],
 ];
 
-export const INSIGHT_TITLES = ['The Evolution of QbD', 'Good AI Practice in Pharma & Biotech', 'Technical Due Diligence for Pharma & Biotech Investment', 'Commercializing Sterile Ophthalmic Eye Drops', 'From Small Molecules to Biologics'];
 
 export const FRAMEWORK_LIBRARY = [
   ['Commercialization Planning Framework', 'Build one integrated commercialization plan linking technical milestones, manufacturing capability, regulatory needs, supply dependencies, business decisions, and launch readiness.'],
@@ -68,10 +67,18 @@ export const ACTION_FLOW = ['Explore', 'Assess', 'Score', 'Prioritize', 'Align',
 
 export const PRIMARY_AREAS = ['CMC & Late-Stage Development', 'MS&T & Technical Operations', 'Technology Transfer', 'Manufacturing Readiness', 'Validation / PPQ / Launch', 'Specialized Products', 'AI & Digital Transformation', 'Technical Due Diligence', 'Other'];
 
-export const COVERS: [string, string][] = [
-  ['cover-qbd', 'The Evolution of QbD'],
-  ['cover-ai', 'Good AI Practice in Pharma & Biotech'],
-  ['cover-dd', 'Technical Due Diligence for Pharma & Biotech Investment'],
-  ['cover-eye', 'Commercializing Sterile Ophthalmic Eye Drops'],
-  ['cover-mol', 'From Small Molecules to Biologics'],
+export const WHAT_GAPS = ['Development', 'CMC', 'MS&T', 'Engineering', 'Manufacturing', 'Quality', 'Regulatory', 'Supply Chain', 'Commercial'];
+export const ONE_LINES = [
+  ['One product strategy', 'Development, CMC and regulatory plans pulling in the same direction.'],
+  ['One manufacturing strategy', 'Sites, equipment and people planned around the process.'],
+  ['One integrated risk picture', 'Cross-functional risks visible early, owned and prioritized.'],
+  ['One path to reliable commercial supply', 'From first understanding to sustained performance.'],
+];
+export const CAREER = [
+  { label: 'DEVELOPMENT', note: 'Pharmaceutical Development' },
+  { label: 'CMC', note: 'CMC & Global External Manufacturing' },
+  { label: 'MS&T', note: 'Process stewardship' },
+  { label: 'TECHNICAL OPERATIONS', note: 'Process Development & Commercialization' },
+  { label: 'MANUFACTURING LEADERSHIP', note: 'Site Head / General Management' },
+  { label: 'ENTERPRISE COMMERCIALIZATION', note: 'Executive advisory' },
 ];

@@ -3,8 +3,7 @@ import {
   Menu, 
   X, 
   ChevronDown, 
-  Search,
-  ArrowRight
+  Search
 } from 'lucide-react';
 import { logoImg } from '../assets/images';
 
@@ -125,7 +124,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => handleNavClick('/insights')}
               className={`nav-link-indicator py-1 whitespace-nowrap ${
-                (currentRoute.startsWith('/blogs') || currentRoute === '/insights') ? 'text-[#2F9FEA] is-active' : 'text-[#123B5D] hover:text-[#2F9FEA]'
+                (currentRoute.startsWith('/blogs') || currentRoute.startsWith('/insights')) ? 'text-[#2F9FEA] is-active' : 'text-[#123B5D] hover:text-[#2F9FEA]'
               }`}
             >
               INSIGHTS

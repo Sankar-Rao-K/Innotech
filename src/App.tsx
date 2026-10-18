@@ -9,7 +9,6 @@ import { Chatbot } from './components/Chatbot';
 import { HomePage } from './pages/HomePage';
 import { WhoWeArePage } from './pages/WhoWeArePage';
 import { OurFounderPage } from './pages/OurFounderPage';
-import { WhatSetsUsApartPage } from './pages/WhatSetsUsApartPage';
 import { OurServicesPage } from './pages/OurServicesPage';
 import { OurExpertisePage } from './pages/OurExpertisePage';
 import { FrameworksPage } from './pages/FrameworksPage';
@@ -17,14 +16,14 @@ import { OurPartnersPage } from './pages/OurPartnersPage';
 import { BlogsPage } from './pages/BlogsPage';
 import { BlogDetailPage } from './pages/BlogDetailPage';
 import { ContactUsPage } from './pages/ContactUsPage';
-import { CareersPage } from './pages/CareersPage';
 import { TermsConditionsPage } from './pages/TermsConditionsPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 
+const normalize = (p: string) => (p.length > 1 ? p.replace(/\/+$/, '') : p) || '/';
+
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState<string>(() => {
-    const path = window.location.pathname;
-    return path || '/';
+    return normalize(window.location.pathname);
   });
 
   const [consultationModalOpen, setConsultationModalOpen] = useState(false);
@@ -33,7 +32,7 @@ export default function App() {
 
   useEffect(() => {
     const handlePopState = () => {
-      setCurrentRoute(window.location.pathname || '/');
+      setCurrentRoute(normalize(window.location.pathname));
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -41,7 +40,7 @@ export default function App() {
 
   const navigate = (route: string) => {
     window.history.pushState({}, '', route);
-    setCurrentRoute(route);
+    setCurrentRoute(normalize(route));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -50,6 +49,23 @@ export default function App() {
   const showToast = (msg: string) => {
     setToastMessage(msg);
   };
+
+  // Per-page browser tab titles
+  useEffect(() => {
+    const base = 'InnoTech BioPharm Solutions';
+    const titles: Record<string, string> = {
+      '/': `${base} | Pharmaceutical & Biotechnology Commercialization Advisory`,
+      '/about-us': `About | ${base}`, '/who-we-are': `About | ${base}`, '/our-founder': `Raj Thota, Founder | ${base}`,
+      '/our-partners': `Who We Work With | ${base}`, '/who-we-work-with': `Who We Work With | ${base}`,
+      '/our-expertise': `Expertise | ${base}`, '/expertise': `Expertise | ${base}`, '/our-services': `Services | ${base}`, '/services': `Services | ${base}`,
+      '/frameworks': `Frameworks & Executive Tools | ${base}`, '/our-capabilities': `Frameworks & Executive Tools | ${base}`,
+      '/insights': `Executive Insights | ${base}`, '/blogs': `Executive Insights | ${base}`,
+      '/contact-us': `Contact | ${base}`, '/contact': `Contact | ${base}`,
+      '/privacy-policy': `Privacy Policy | ${base}`, '/privacy': `Privacy Policy | ${base}`,
+      '/terms-and-conditions': `Terms & Conditions | ${base}`, '/terms': `Terms & Conditions | ${base}`,
+    };
+    document.title = titles[currentRoute] || (/^\/(insights|blogs)\//.test(currentRoute) ? `Publication | ${base}` : `Page not found | ${base}`);
+  }, [currentRoute]);
 
   // Render current view according to route
   const renderCurrentPage = () => {
@@ -62,9 +78,6 @@ export default function App() {
     if (currentRoute === '/our-founder') {
       return <OurFounderPage navigate={navigate} openConsultationModal={() => setConsultationModalOpen(true)} />;
     }
-    if (currentRoute === '/what-sets-us-apart') {
-      return <WhatSetsUsApartPage navigate={navigate} openConsultationModal={() => setConsultationModalOpen(true)} />;
-    }
     if (currentRoute === '/our-services' || currentRoute === '/services') {
       return <OurServicesPage navigate={navigate} openConsultationModal={() => setConsultationModalOpen(true)} />;
     }
@@ -74,14 +87,14 @@ export default function App() {
     if (currentRoute === '/frameworks' || currentRoute === '/our-capabilities') {
       return <FrameworksPage openConsultationModal={() => setConsultationModalOpen(true)} />;
     }
-    if (currentRoute === '/our-partners') {
+    if (currentRoute === '/our-partners' || currentRoute === '/who-we-work-with') {
       return <OurPartnersPage navigate={navigate} openConsultationModal={() => setConsultationModalOpen(true)} />;
     }
     if (currentRoute === '/blogs' || currentRoute === '/insights') {
       return <BlogsPage navigate={navigate} openConsultationModal={() => setConsultationModalOpen(true)} />;
     }
-    if (currentRoute.startsWith('/blogs/')) {
-      const slug = currentRoute.replace('/blogs/', '');
+    if (currentRoute.startsWith('/insights/') || currentRoute.startsWith('/blogs/')) {
+      const slug = currentRoute.replace(/^\/(insights|blogs)\//, '').replace(/\/$/, '');
       return (
         <BlogDetailPage
           slug={slug}
@@ -94,18 +107,25 @@ export default function App() {
     if (currentRoute === '/contact-us' || currentRoute === '/contact') {
       return <ContactUsPage showToast={showToast} />;
     }
-    if (currentRoute === '/careers') {
-      return <CareersPage showToast={showToast} />;
-    }
-    if (currentRoute === '/terms-and-conditions') {
+    if (currentRoute === '/terms-and-conditions' || currentRoute === '/terms') {
       return <TermsConditionsPage />;
     }
-    if (currentRoute === '/privacy-policy') {
+    if (currentRoute === '/privacy-policy' || currentRoute === '/privacy') {
       return <PrivacyPolicyPage />;
     }
 
-    // Default Fallback
-    return <HomePage navigate={navigate} openConsultationModal={() => setConsultationModalOpen(true)} />;
+    // Unknown address: friendly 404 with a way back
+    return (
+      <div className="max-w-xl mx-auto px-4 py-24 text-center font-sans">
+        <p className="text-sm font-black text-emerald-600">404</p>
+        <h1 className="text-3xl font-black text-[#123B5D] mt-1">Page not found</h1>
+        <p className="mt-2 text-[#536B7D]">The page you are looking for does not exist or has moved.</p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <button onClick={() => navigate('/')} className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-5 py-2.5 rounded-md">Go to Home</button>
+          <button onClick={() => navigate('/contact-us')} className="border border-blue-300 text-blue-700 font-bold text-sm px-5 py-2.5 rounded-md">Contact us</button>
+        </div>
+      </div>
+    );
   };
 
   return (

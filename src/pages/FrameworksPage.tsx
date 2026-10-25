@@ -7,10 +7,11 @@ import { FRAMEWORK_STAGES, FRAMEWORK_LIBRARY, READINESS_SCALE, DECISION_OUTCOMES
 const STEPS = ['FRAMEWORK', 'ASSESSMENT', 'SCORECARD', 'RISK PRIORITIZATION', 'ROADMAP', 'IMPLEMENTATION', 'VERIFICATION', 'SUSTAINMENT'];
 const OUTCOME_TONE = ['bg-emerald-100 border-emerald-300', 'bg-yellow-100 border-yellow-300', 'bg-orange-100 border-orange-300', 'bg-red-100 border-red-300'];
 
-export const FrameworksPage: React.FC<{ openConsultationModal: () => void }> = ({ openConsultationModal }) => (
+export const FrameworksPage: React.FC<{ navigate: (r: string) => void; openConsultationModal: () => void }> = ({ navigate, openConsultationModal }) => (
   <div className="font-sans text-[#536B7D] bg-white">
-    <Hero title="Frameworks & Executive Tools" accent="From Insight to Action" image="fw-hero" imageAlt="Executives reviewing analytics on a large display">
+    <Hero image="svc-16" imageAlt="Executives reviewing business performance" title="Frameworks & Executive Tools" sub="From Insight to Action">
       <p>Practical frameworks for assessing risk, aligning functions, and building the technical and organizational capability required for reliable commercialization.</p>
+      <button onClick={() => navigate('/insights')} className="text-sm font-bold text-[#0A2A8F] hover:underline">← Back to Insights &amp; Resources</button>
     </Hero>
 
     <section className="border-b border-[#D7EAF7] bg-white py-6"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,7 +28,7 @@ export const FrameworksPage: React.FC<{ openConsultationModal: () => void }> = (
           <AnimateOnScroll key={t} type="fade-up" delay={(i % 3) * 0.08}>
             <div className="h-full bg-white border border-[#D7EAF7] rounded-lg overflow-hidden flex hover:shadow-md transition-shadow">
               <img src={img(`fw-lib${i + 1}`)} alt="" loading="lazy" className="w-24 sm:w-28 shrink-0 object-cover" />
-              <div className="p-3"><h3 className="font-bold text-blue-700 text-sm">{t}</h3><p className="text-xs mt-1.5 leading-relaxed">{d}</p></div>
+              <div className="p-3"><h3 className="font-bold text-[#0A2A7A] text-sm">{t}</h3><p className="text-xs mt-1.5 leading-relaxed">{d}</p></div>
             </div>
           </AnimateOnScroll>
         ))}

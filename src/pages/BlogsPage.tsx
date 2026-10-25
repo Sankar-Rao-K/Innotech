@@ -1,138 +1,191 @@
-import React, { useMemo, useState } from 'react';
-import { ArrowRight, Search, FileText } from 'lucide-react';
-import { Hero, Section } from '../components/Ui';
-import { Cta } from '../components/Ui';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ArrowRight, Search } from 'lucide-react';
+import { Hero, SectionHead, Cta, Arrow, img, NAVY } from '../components/Ui';
 import { AnimateOnScroll } from '../components/AnimateOnScroll';
-import { PUBLICATIONS, TOPICS, FEATURED, formatDate, Publication } from '../data/publications';
+import { RESOURCES, TOPICS, TABS, Tab, Resource, tabMatches, bySlug, formatDate, FEATURED_MAIN, FEATURED_SIDE, PUBLICATION_ROW, ARTICLE_ROW, LATEST, findResource } from '../data/publications';
 
-const QBD: [string, string][] = [['UNDERSTAND — Foundational QbD', 'Build scientific understanding and control.'], ['PREDICT — Digital-QbD', 'Use advanced analytics, models, AI/ML, PAT, and digital twins to strengthen prediction.'], ['INTEGRATE — Combination-Product QbD', 'Expand the system boundary to drug/biologic, device, container, interfaces, manufacturing/assembly, and user.'], ['SUSTAIN — Enterprise QbD', 'Connect knowledge, control, performance, governance, and learning across the lifecycle.']];
-const LEARN: [string, string][] = [['Foundation', 'Core concepts and regulatory landscape.'], ['Drug Substance', 'Cell line development, process development, and scale-up.'], ['Drug Product', 'Formulation, fill-finish, and analytical strategy.'], ['Technology Transfer', 'From development to commercial manufacturing.'], ['Scale-Up & Manufacturing', 'Process performance and continuous improvement.'], ['Validation & Control', 'PPQ, lifecycle management, and compliance.'], ['Commercialization', 'Supply chain, market readiness, and successful launch.'], ['Leadership', 'Strategic thinking for long-term success.']];
-
-const Cover: React.FC<{ p: Publication; className?: string }> = ({ p, className = '' }) => (
-  <img src={p.cover} alt={`Cover of ${p.title}`} loading="lazy" className={`object-cover object-top bg-white ${className}`} />
+const Thumb: React.FC<{ r: Resource; className?: string }> = ({ r, className = '' }) => (
+  <img src={img(r.image)} alt={r.style === 'book' ? `Cover of ${r.title}` : ''} loading="lazy" className={`w-full object-cover ${r.style === 'book' ? 'aspect-[4/5] object-top' : 'aspect-[16/10]'} ${className}`} />
 );
-const Meta: React.FC<{ p: Publication }> = ({ p }) => (
-  <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600">{p.type} · {formatDate(p.date)} · {p.pages} pp</span>
-);
+const KindTag: React.FC<{ r: Resource }> = ({ r }) => <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600">{r.kind}{r.date ? ` · ${formatDate(r.date)}` : ''}</span>;
 
 export const BlogsPage: React.FC<{ navigate: (r: string) => void; openConsultationModal: () => void }> = ({ navigate, openConsultationModal }) => {
+  const [tab, setTab] = useState<Tab>('Featured');
   const [topic, setTopic] = useState<string | null>(null);
-  const [type, setType] = useState<'All' | 'White Paper' | 'Blog'>('All');
   const [q, setQ] = useState('');
   const open = (slug: string) => navigate(`/insights/${slug}`);
-  const goList = () => document.getElementById('all-publications')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const toLibrary = () => setTimeout(() => document.getElementById('library')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+  const reset = () => { setTab('Featured'); setTopic(null); setQ(''); };
+
+  // arriving from another page with a topic pre-selected (for example Expertise "Learn More")
+  useEffect(() => {
+    try { const t = sessionStorage.getItem('insights-topic'); if (t && TOPICS.includes(t)) { setTopic(t); sessionStorage.removeItem('insights-topic'); toLibrary(); } } catch { /* ignore */ }
+  }, []);
 
   const list = useMemo(() => {
     const k = q.trim().toLowerCase();
-    return PUBLICATIONS.filter(p => (!topic || p.topics.includes(topic)) && (type === 'All' || p.type === type) && (!k || (p.title + ' ' + p.summary).toLowerCase().includes(k)));
-  }, [topic, type, q]);
+    return RESOURCES.filter(r => tabMatches(tab, r) && (!topic || r.topics.includes(topic)) && (!k || (r.title + ' ' + r.subtitle + ' ' + r.summary).toLowerCase().includes(k)));
+  }, [tab, topic, q]);
+  const filtering = tab !== 'Featured' || !!topic || !!q;
 
-  const featured = FEATURED.map(s => PUBLICATIONS.find(p => p.slug === s)!);
-  const [lead, ...rest] = featured;
-  const latest = [...PUBLICATIONS].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
+  const main = findResource(FEATURED_MAIN)!;
+  const side = bySlug(FEATURED_SIDE), pubRow = bySlug(PUBLICATION_ROW), artRow = bySlug(ARTICLE_ROW), latest = bySlug(LATEST);
 
   return (
-    <div className="font-sans text-[#536B7D] bg-white">
-      <Hero
-        title="Executive Insights"
-        accent="Where Science, Manufacturing, Technology, and Commercialization Converge"
+    <div className="font-sans bg-white">
+      <Hero variant="dark" image="ins-23" title="Insights & Resources" sub="Connecting Science, Development, Manufacturing and Commercialization"
         aside={
-          <div className="relative h-60 sm:h-72 flex items-center justify-center">
-            {featured.slice(0, 4).map((p, i) => (
-              <img key={p.slug} src={p.cover} alt="" aria-hidden="true" className="absolute w-28 sm:w-36 aspect-[3/4] object-cover object-top rounded-md shadow-2xl border border-white/30"
-                style={{ left: `calc(50% + ${(i - 1.5) * 62}px - 4.5rem)`, transform: `rotate(${(i - 1.5) * 6}deg) translateY(${Math.abs(i - 1.5) * 8}px)`, zIndex: i }} />
+          <div className="relative flex h-60 items-center justify-center sm:h-72">
+            {['ins-7', 'ins-6', 'ins-9', 'ins-10'].map((im, i) => (
+              <img key={im} src={img(im)} alt="" aria-hidden="true" className="absolute aspect-[4/5] w-28 rounded-md border border-white/30 object-cover shadow-2xl sm:w-36 lg:w-40" style={{ left: `calc(50% + ${(i - 1.5) * 64}px - 4.5rem)`, transform: `rotate(${(i - 1.5) * 5}deg) translateY(${Math.abs(i - 1.5) * 6}px)`, zIndex: i }} />
             ))}
           </div>
-        }
-      >
-        <p>Executive white papers, guides, playbooks, frameworks, and learning resources for leaders navigating the transition from development to commercial manufacturing and lifecycle performance.</p>
-        <p className="text-[11px] font-bold tracking-wider">WHITE PAPERS | EXECUTIVE GUIDES | PLAYBOOKS | FRAMEWORKS | LEARNING SERIES</p>
+        }>
+        <p>Explore InnoTech perspectives, white papers, executive guides, playbooks, frameworks and technical articles addressing pharmaceutical development, CMC, MS&amp;T, technology transfer, manufacturing, commercialization, lifecycle management and emerging digital technologies.</p>
       </Hero>
 
-      <Section title="Featured Publications" sub="In-depth executive perspectives on key commercialization topics.">
-        <div className="grid lg:grid-cols-[1.3fr_2fr] gap-5">
+      <nav aria-label="Resource types" className="sticky top-[61px] z-30 border-b border-[#D7EAF7] bg-white/95 backdrop-blur sm:top-[69px]">
+        <ul className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-2.5 no-scrollbar sm:px-6 lg:px-8">
+          {TABS.map(t => (
+            <li key={t} className="shrink-0">
+              <button onClick={() => { setTab(t); setTopic(null); setQ(''); if (t !== 'Featured') toLibrary(); }} aria-pressed={tab === t} className={`rounded-lg px-4 py-2.5 text-[13px] font-bold transition-colors ${tab === t ? 'bg-[#0A2A8F] text-white shadow' : `bg-[#E6F0FF] ${NAVY} hover:bg-blue-100`}`}>{t}</button>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+        <div className="flex items-end justify-between gap-4">
+          <SectionHead title="Featured Publications" sub="In-depth executive perspectives on key commercialization topics." />
+          <button onClick={() => { reset(); toLibrary(); }} className={`hidden shrink-0 items-center gap-1.5 text-sm font-extrabold sm:inline-flex ${NAVY} hover:text-blue-600`}>View All Publications <Arrow /></button>
+        </div>
+        <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,3fr)]">
           <AnimateOnScroll type="fade-up">
-            <button onClick={() => open(lead.slug)} className="group h-full w-full text-left grid sm:grid-cols-[150px_1fr] lg:grid-cols-1 xl:grid-cols-[150px_1fr] gap-4 border border-[#D7EAF7] rounded-xl p-4 hover:shadow-lg transition-shadow bg-white">
-              <Cover p={lead} className="w-full max-w-[200px] sm:max-w-none aspect-[3/4] rounded-md shadow" />
-              <span className="flex flex-col"><Meta p={lead} /><span className="text-lg font-black text-[#123B5D] mt-1 group-hover:text-blue-700">{lead.title}</span><span className="text-sm mt-2">{lead.summary}</span><span className="mt-auto pt-3 inline-flex items-center gap-1 font-bold text-blue-700 text-sm">Read Publication <ArrowRight className="w-4 h-4" /></span></span>
+            <button onClick={() => open(main.slug)} className="group grid h-full w-full gap-4 rounded-xl border border-[#D7EAF7] bg-white p-4 text-left shadow-sm transition-shadow hover:shadow-lg sm:grid-cols-[170px_1fr] lg:grid-cols-1 xl:grid-cols-[150px_1fr]">
+              <Thumb r={main} className="mx-auto max-w-[220px] rounded-md shadow lg:max-w-none" />
+              <span className="flex flex-col">
+                <span className="w-fit rounded bg-emerald-500 px-2 py-0.5 text-[10px] font-extrabold text-white">FEATURED</span>
+                <span className={`mt-2 text-lg font-black leading-snug ${NAVY}`}>Good AI Practice</span>
+                <span className="mt-1.5 text-sm text-[#27407A]">Executive interpretation for pharmaceutical biotechnology development, manufacturing and commercialization.</span>
+                <span className="mt-4 inline-flex w-fit items-center gap-2 rounded-md bg-[#0A2A8F] px-4 py-2 text-sm font-bold text-white">Read Publication <Arrow /></span>
+              </span>
             </button>
           </AnimateOnScroll>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {rest.map((p, i) => (
-              <AnimateOnScroll key={p.slug} type="fade-up" delay={0.08 * (i + 1)}>
-                <button onClick={() => open(p.slug)} className="group h-full w-full text-left flex gap-3 border border-[#D7EAF7] rounded-xl p-3 hover:shadow-lg transition-shadow bg-white">
-                  <Cover p={p} className="w-20 shrink-0 aspect-[3/4] rounded shadow" />
-                  <span><Meta p={p} /><span className="block text-sm font-bold text-[#123B5D] leading-snug mt-0.5 group-hover:text-blue-700">{p.title}</span><span className="mt-1.5 inline-flex items-center gap-1 text-xs font-bold text-blue-700">Read Publication <ArrowRight className="w-3 h-3" /></span></span>
+          <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+            {side.map((r, i) => (
+              <AnimateOnScroll as="li" key={r.slug} type="fade-up" delay={i * 0.06} className="list-none">
+                <button onClick={() => open(r.slug)} className="group flex h-full w-full flex-col overflow-hidden rounded-xl border border-[#D7EAF7] bg-white text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
+                  <Thumb r={r} />
+                  <span className="flex flex-1 flex-col p-3">
+                    <span className={`text-[13px] font-extrabold leading-snug ${NAVY} group-hover:text-blue-600`}>{r.title}</span>
+                    <span className="mt-1 text-xs leading-snug text-[#27407A]">{r.tagline || r.subtitle || r.summary.split('.')[0] + '.'}</span>
+                    <span className={`mt-auto inline-flex items-center gap-1 pt-2 text-xs font-extrabold ${NAVY}`}>Read Publication <ArrowRight className="h-3 w-3" /></span>
+                  </span>
                 </button>
               </AnimateOnScroll>
             ))}
-          </div>
+          </ul>
         </div>
-        <button onClick={() => { setTopic(null); setType('All'); setQ(''); setTimeout(goList, 50); }} className="mt-5 font-bold text-sm text-blue-700 inline-flex items-center gap-1">View All Publications <ArrowRight className="w-4 h-4" /></button>
-      </Section>
+      </section>
 
-      <Section tint title="Browse by Topic" sub="Explore insights and publications by key topic area.">
-        <div className="flex flex-wrap gap-2">
-          {TOPICS.map(t => {
-            const count = PUBLICATIONS.filter(p => p.topics.includes(t)).length;
-            return (
-              <button key={t} onClick={() => { setTopic(topic === t ? null : t); setTimeout(goList, 50); }} aria-pressed={topic === t}
-                className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${topic === t ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-800 border-[#D7EAF7] hover:border-blue-400'}`}>
-                {t} <span className={`ml-1 text-xs ${topic === t ? 'text-blue-100' : 'text-slate-400'}`}>{count}</span>
+      <section className="bg-[#F4F9FE] py-10 sm:py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionHead title="Browse by Topic" sub="Explore insights and publications by key topic area." />
+          <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {TOPICS.map(t => {
+              const on = topic === t;
+              return (
+                <li key={t}>
+                  <button onClick={() => { setTopic(on ? null : t); setTab('Featured'); toLibrary(); }} aria-pressed={on} className={`flex h-full w-full items-center justify-between gap-2 rounded-lg border px-3.5 py-3 text-left text-[13px] font-bold transition-all ${on ? 'border-[#0A2A8F] bg-[#0A2A8F] text-white shadow' : `border-[#D7EAF7] bg-white ${NAVY} hover:-translate-y-0.5 hover:border-blue-300`}`}>
+                    <span>{t}</span><ArrowRight className="h-4 w-4 shrink-0" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+        <div className="flex items-end justify-between gap-4">
+          <SectionHead title="White Papers & Executive Publications" sub="Curated library of white papers, executive guides and playbooks covering development through commercialization." />
+          <button onClick={() => { reset(); toLibrary(); }} className={`hidden shrink-0 items-center gap-1.5 text-sm font-extrabold sm:inline-flex ${NAVY} hover:text-blue-600`}>View All Publications <Arrow /></button>
+        </div>
+        <ul className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
+          {pubRow.map((r, i) => (
+            <AnimateOnScroll as="li" key={r.slug} type="fade-up" delay={(i % 4) * 0.05} className="list-none">
+              <button onClick={() => open(r.slug)} className="group flex h-full w-full flex-col overflow-hidden rounded-xl border border-[#D7EAF7] bg-white text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
+                <Thumb r={r} />
+                <span className="flex flex-1 flex-col p-2.5"><span className="text-[10px] font-extrabold uppercase tracking-wide text-[#0A2A7A]">{r.kind}</span><span className={`mt-0.5 text-[12.5px] font-bold leading-snug ${NAVY} group-hover:text-blue-600`}>{r.title}</span></span>
               </button>
-            );
-          })}
-        </div>
-      </Section>
+            </AnimateOnScroll>
+          ))}
+        </ul>
+      </section>
 
-      <Section id="all-publications" title="All Publications" sub={`${list.length} of ${PUBLICATIONS.length} publications${topic ? ` in “${topic}”` : ''}`}>
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <label className="relative flex-1">
-            <span className="sr-only">Search publications</span>
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search publications…" className="w-full rounded-lg border border-[#D7EAF7] pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-          </label>
-          <div className="flex gap-1 rounded-lg bg-[#F5FAFE] p-1 border border-[#D7EAF7]" role="group" aria-label="Filter by type">
-            {(['All', 'White Paper', 'Blog'] as const).map(t => <button key={t} onClick={() => setType(t)} aria-pressed={type === t} className={`flex-1 sm:flex-none rounded-md px-3 py-1.5 text-xs font-bold ${type === t ? 'bg-white shadow text-blue-700' : 'text-slate-500'}`}>{t === 'All' ? 'All' : t + 's'}</button>)}
+      <section className="bg-[#F4F9FE] py-10 sm:py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-end justify-between gap-4">
+            <SectionHead title="Technical Articles & Perspectives" sub="In-depth technical articles and executive commentary." />
+            <button onClick={() => { setTab('Technical Articles & Perspectives'); setTopic(null); setQ(''); toLibrary(); }} className={`hidden shrink-0 items-center gap-1.5 text-sm font-extrabold sm:inline-flex ${NAVY} hover:text-blue-600`}>View All Articles <Arrow /></button>
           </div>
-          {(topic || type !== 'All' || q) && <button onClick={() => { setTopic(null); setType('All'); setQ(''); }} className="text-sm font-bold text-blue-700 px-2">Clear filters</button>}
-        </div>
-        {list.length === 0 ? (
-          <p className="rounded-lg bg-[#F5FAFE] border border-[#D7EAF7] p-6 text-center text-sm">No publications match your filters. <button onClick={() => { setTopic(null); setType('All'); setQ(''); }} className="font-bold text-blue-700">Show all</button></p>
-        ) : (
-          <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {list.map(p => (
-              <li key={p.slug}>
-                <button onClick={() => open(p.slug)} className="group h-full w-full text-left flex gap-4 border border-[#D7EAF7] rounded-xl p-3 hover:shadow-lg hover:-translate-y-0.5 transition-all bg-white">
-                  <Cover p={p} className="w-24 shrink-0 aspect-[3/4] rounded shadow" />
-                  <span className="flex flex-col"><Meta p={p} /><span className="text-sm font-bold text-[#123B5D] leading-snug mt-0.5 group-hover:text-blue-700">{p.title}</span><span className="text-xs mt-1.5 line-clamp-3">{p.summary}</span><span className="mt-auto pt-2 inline-flex items-center gap-1 text-xs font-bold text-blue-700"><FileText className="w-3.5 h-3.5" /> Read &amp; download PDF</span></span>
+          <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {artRow.map((r, i) => (
+              <AnimateOnScroll as="li" key={r.slug} type="fade-up" delay={i * 0.07} className="list-none">
+                <button onClick={() => open(r.slug)} className="group flex h-full w-full flex-col overflow-hidden rounded-xl border border-[#D7EAF7] bg-white text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
+                  <img src={img(r.image)} alt="" loading="lazy" className="h-36 w-full object-cover" />
+                  <span className="flex flex-1 flex-col p-3.5"><span className={`text-sm font-extrabold leading-snug ${NAVY} group-hover:text-blue-600`}>{r.title}</span><span className={`mt-auto inline-flex items-center gap-1 pt-2 text-xs font-extrabold ${NAVY}`}>{r.kind} <ArrowRight className="h-3 w-3" /></span></span>
                 </button>
-              </li>
+              </AnimateOnScroll>
             ))}
           </ul>
-        )}
-      </Section>
-
-      <Section tint title="Signature Series – The Evolution of QbD" sub="Four connected perspectives for today's pharmaceutical and biotechnology challenges.">
-        <ol className="grid md:grid-cols-2 gap-3">{QBD.map(([t, d], i) => <li key={t} className="flex gap-3 bg-white border border-[#D7EAF7] rounded-lg p-3"><span className="font-black text-blue-600">0{i + 1}</span><div><h3 className="font-bold text-sm text-[#123B5D]">{t}</h3><p className="text-xs">{d}</p></div></li>)}</ol>
-      </Section>
-
-      <Section title="Executive Learning Series — From Small Molecules to Biologics" sub="Building the Next Generation of Commercialization Leaders. A practical learning roadmap for leaders expanding their understanding across biologics development, manufacturing, technology transfer, validation, and commercialization.">
-        <ol className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">{LEARN.map(([t, d], i) => <li key={t} className="flex gap-3 border border-[#D7EAF7] rounded-lg p-3"><span className="font-black text-blue-600">0{i + 1}</span><div><h3 className="font-bold text-sm text-[#123B5D]">{t}</h3><p className="text-xs">{d}</p></div></li>)}</ol>
-      </Section>
-
-      <Section tint title="Latest Perspectives" sub="Recent articles and thought leadership on key commercialization topics.">
-        <div className="grid md:grid-cols-3 gap-4">
-          {latest.map(p => (
-            <button key={p.slug} onClick={() => open(p.slug)} className="group text-left bg-white border border-[#D7EAF7] rounded-xl p-4 hover:shadow-lg transition-shadow">
-              <Meta p={p} /><h3 className="font-bold text-sm text-[#123B5D] mt-1 group-hover:text-blue-700">{p.title}</h3><p className="text-xs mt-1.5 line-clamp-3">{p.summary}</p>
-              <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-blue-700">Read Perspective <ArrowRight className="w-3 h-3" /></span>
-            </button>
-          ))}
         </div>
-      </Section>
+      </section>
 
-      <Cta title="From Insight to Action" text="Applying this thinking to a current product, site, technology transfer, Technical Operations, AI/digital, or commercialization challenge? Translate the framework into a readiness assessment, risk review, implementation roadmap, or executive advisory discussion." label="Discuss Your Challenge" onClick={openConsultationModal} image="ins-cta" />
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+        <div className="flex items-end justify-between gap-4">
+          <SectionHead title="Latest Perspectives" sub="Recent articles, guides and thought leadership on key commercialization topics." />
+          <button onClick={() => { reset(); toLibrary(); }} className={`hidden shrink-0 items-center gap-1.5 text-sm font-extrabold sm:inline-flex ${NAVY} hover:text-blue-600`}>View All Insights &amp; Resources <Arrow /></button>
+        </div>
+        <ul className="mt-6 grid gap-4 md:grid-cols-3">
+          {latest.map((r, i) => (
+            <AnimateOnScroll as="li" key={r.slug} type="fade-up" delay={i * 0.07} className="list-none">
+              <button onClick={() => open(r.slug)} className="group grid h-full w-full grid-cols-[120px_1fr] overflow-hidden rounded-xl border border-[#D7EAF7] bg-white text-left shadow-sm transition-all hover:shadow-lg">
+                <img src={img(r.image)} alt="" loading="lazy" className="h-full w-full object-cover" />
+                <span className="p-3.5"><span className={`block text-sm font-extrabold leading-snug ${NAVY} group-hover:text-blue-600`}>{r.title}</span><span className={`mt-2 inline-flex items-center gap-1 text-xs font-extrabold ${NAVY}`}>{r.kind} <ArrowRight className="h-3 w-3" /></span></span>
+              </button>
+            </AnimateOnScroll>
+          ))}
+        </ul>
+      </section>
+
+      <section id="library" className="scroll-mt-32 bg-[#F4F9FE] py-10 sm:py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionHead title="All Insights & Resources" sub={`${list.length} of ${RESOURCES.length} resources${tab !== 'Featured' ? ` · ${tab}` : ''}${topic ? ` · ${topic}` : ''}`} />
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <label className="relative flex-1"><span className="sr-only">Search resources</span><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search resources…" className="w-full rounded-lg border border-[#D7EAF7] bg-white py-2.5 pl-9 pr-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-400 sm:text-sm" /></label>
+            {filtering && <button onClick={reset} className="text-sm font-bold text-blue-700">Clear filters</button>}
+          </div>
+          {list.length === 0 ? (
+            <p className="mt-6 rounded-lg border border-[#D7EAF7] bg-white p-6 text-center text-sm">No resources match your filters. <button onClick={reset} className="font-bold text-blue-700">Show all</button></p>
+          ) : (
+            <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {list.map(r => (
+                <li key={r.slug}>
+                  <button onClick={() => open(r.slug)} className="group flex h-full w-full flex-col overflow-hidden rounded-xl border border-[#D7EAF7] bg-white text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
+                    <img src={img(r.image)} alt="" loading="lazy" className="h-40 w-full object-cover" style={r.style === 'book' ? { objectPosition: 'top' } : undefined} />
+                    <span className="flex flex-1 flex-col p-3.5"><KindTag r={r} /><span className={`mt-1 text-sm font-extrabold leading-snug ${NAVY} group-hover:text-blue-600`}>{r.title}</span><span className="mt-1.5 line-clamp-3 text-xs text-[#27407A]">{r.summary}</span>
+                      <span className={`mt-auto inline-flex items-center gap-1 pt-2.5 text-xs font-extrabold ${NAVY}`}>{r.pdf ? 'Read & download PDF' : 'View details'} <ArrowRight className="h-3 w-3" /></span></span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
+
+      <Cta image="ins-25" title={<>From Insight to <span className="text-cyan-300">Execution</span></>} text="These resources reflect how InnoTech approaches real development, CMC, manufacturing and commercialization challenges. The same thinking can be applied through CMC development support, project leadership, technology transfer, on-site technical support, readiness assessment, and professional development." label="Discuss Your Project" onClick={openConsultationModal} />
     </div>
   );
 };

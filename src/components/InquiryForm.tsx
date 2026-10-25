@@ -1,38 +1,27 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Check, CheckCircle2, Copy, Cpu, Factory, FlaskConical, Mail, MoreHorizontal, Repeat, Search, Settings, ShieldCheck, Syringe } from 'lucide-react';
-import { PRIMARY_AREAS } from '../data/commercialization';
+import { ALL_AREAS, starterFor } from '../data/contactAreas';
 import { COMPANY_DETAILS } from '../data/siteData';
 import { submitInquiry, inquiryText, Inquiry } from '../utils/submitInquiry';
 
 type Key = keyof Inquiry;
 const MAX = 600, MIN = 20;
 const DRAFT = 'innotech-inquiry-draft';
-const empty: Inquiry = { name: '', company: '', email: '', area: '', challenge: '' };
+const empty: Inquiry = { name: '', company: '', email: '', areas: [], challenge: '' };
 const ICONS = [FlaskConical, Settings, Repeat, Factory, ShieldCheck, Syringe, Cpu, Search, MoreHorizontal];
-const STARTERS: Record<string, string> = {
-  'CMC & Late-Stage Development': 'We are preparing for late-stage development and would like an independent view of our CMC readiness.',
-  'MS&T & Technical Operations': 'We want to strengthen our MS&T / Technical Operations model and process stewardship after launch.',
-  'Technology Transfer': 'We are planning a technology transfer and want to assess receiving-site readiness and close gaps early.',
-  'Manufacturing Readiness': 'We would like an independent check of manufacturing readiness before moving to commercial supply.',
-  'Validation / PPQ / Launch': 'We need support with PPQ readiness and technical launch planning for an upcoming milestone.',
-  'Specialized Products': 'We are developing a complex product (for example an ophthalmic, injectable or combination product) and need scale-up and readiness guidance.',
-  'AI & Digital Transformation': 'We want to identify where AI and digital tools can add real value in our technical operations.',
-  'Technical Due Diligence': 'We are evaluating an investment or partnership and need an independent technical and manufacturing risk review.',
-  Other: 'The challenge we would like to discuss is: ',
-};
 const FREE_MAIL = /@(gmail|yahoo|hotmail|outlook|aol|icloud|proton(mail)?)\./i;
 
 const validate = (d: Inquiry): Record<Key, string> => ({
   name: d.name.trim().length >= 2 ? '' : 'Please enter your full name',
   company: d.company.trim().length >= 2 ? '' : 'Please enter your company or organization',
   email: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email.trim()) ? '' : 'Enter a valid work email, like name@company.com',
-  area: d.area ? '' : 'Choose the closest primary area',
+  areas: d.areas.length ? '' : 'Choose at least one area that matches your challenge',
   challenge: d.challenge.trim().length >= MIN ? '' : `Add a little more detail (${d.challenge.trim().length}/${MIN} characters)`,
 });
-const LABELS: Record<Key, string> = { name: 'Name', company: 'Company', email: 'Business email', area: 'Primary area', challenge: 'Challenge' };
+const LABELS: Record<Key, string> = { name: 'Name', company: 'Company', email: 'Business email', areas: 'Primary area', challenge: 'Challenge' };
 
 const loadDraft = (): Inquiry => {
-  try { const s = sessionStorage.getItem(DRAFT); return s ? { ...empty, ...JSON.parse(s) } : empty; } catch { return empty; }
+  try { const s = sessionStorage.getItem(DRAFT); const d = s ? { ...empty, ...JSON.parse(s) } : empty; return Array.isArray(d.areas) ? d : empty; } catch { return empty; }
 };
 
 const base = 'w-full px-3 py-2.5 text-base sm:text-sm bg-white rounded-md border focus:outline-none focus:ring-2 transition-colors font-normal';
@@ -60,10 +49,11 @@ const Ring: React.FC<{ pct: number }> = ({ pct }) => {
   );
 };
 
-interface Props { showToast: (m: string) => void; onDone?: () => void; variant?: 'page' | 'modal' }
+interface Props { showToast: (m: string) => void; onDone?: () => void; variant?: 'page' | 'modal'; areas?: string[]; onAreasChange?: (a: string[]) => void }
 
-export const InquiryForm: React.FC<Props> = ({ showToast, onDone, variant = 'page' }) => {
-  const [d, setD] = useState<Inquiry>(loadDraft);
+export const InquiryForm: React.FC<Props> = ({ showToast, onDone, variant = 'page', areas, onAreasChange }) => {
+  const [d0, setD] = useState<Inquiry>(loadDraft);
+  const d: Inquiry = areas ? { ...d0, areas } : d0;
   const [touched, setTouched] = useState<Partial<Record<Key, boolean>>>({});
   const [sent, setSent] = useState<Inquiry | null>(null);
   const [shake, setShake] = useState(false);
@@ -73,15 +63,16 @@ export const InquiryForm: React.FC<Props> = ({ showToast, onDone, variant = 'pag
   const keys = Object.keys(errs) as Key[];
   const done = keys.filter(k => !errs[k]).length;
   const pct = done / keys.length;
-  const update = (k: Key, v: string) => setD(p => ({ ...p, [k]: v }));
+  const update = (k: Exclude<Key, 'areas'>, v: string) => setD(p => ({ ...p, [k]: v }));
+  const setAreas = (a: string[]) => { if (onAreasChange) onAreasChange(a); else setD(p => ({ ...p, areas: a })); };
   const touch = (k: Key) => setTouched(t => ({ ...t, [k]: true }));
   const show = (k: Key) => !!touched[k];
 
-  useEffect(() => { try { sessionStorage.setItem(DRAFT, JSON.stringify(d)); } catch { /* ignore */ } }, [d]);
+  useEffect(() => { try { sessionStorage.setItem(DRAFT, JSON.stringify(d)); } catch { /* ignore */ } }, [d0, areas]);
 
-  const pickArea = (a: string) => { update('area', a); touch('area'); };
+  const toggleArea = (a: string) => { setAreas(d.areas.includes(a) ? d.areas.filter(x => x !== a) : [...d.areas, a]); touch('areas'); };
   const insertStarter = () => {
-    const s = STARTERS[d.area]; if (!s) return;
+    if (!d.areas.length) return; const s = starterFor(d.areas[0]);
     update('challenge', (d.challenge.trim() ? d.challenge.trim() + '\n\n' : '') + s);
     touch('challenge');
     setTimeout(() => { const t = taRef.current; if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } }, 30);
@@ -91,7 +82,7 @@ export const InquiryForm: React.FC<Props> = ({ showToast, onDone, variant = 'pag
     e.preventDefault();
     const bad = keys.find(k => errs[k]);
     if (bad) {
-      setTouched({ name: true, company: true, email: true, area: true, challenge: true });
+      setTouched({ name: true, company: true, email: true, areas: true, challenge: true });
       setShake(true); setTimeout(() => setShake(false), 500);
       const el = document.getElementById(`f-${bad}`);
       el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -122,7 +113,7 @@ export const InquiryForm: React.FC<Props> = ({ showToast, onDone, variant = 'pag
             <div className="mt-4 flex flex-wrap gap-2">
               <button onClick={copy} className="inline-flex items-center gap-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2"><Copy className="w-4 h-4" /> Copy my request</button>
               <button onClick={() => submitInquiry(sent)} className="inline-flex items-center gap-2 rounded-md border border-blue-300 text-blue-700 text-sm font-bold px-4 py-2"><Mail className="w-4 h-4" /> Open email again</button>
-              <button onClick={() => { setSent(null); setD(empty); setTouched({}); onDone?.(); }} className="rounded-md text-sm font-bold px-4 py-2 text-slate-600">{onDone ? 'Close' : 'Send another request'}</button>
+              <button onClick={() => { setSent(null); setD(empty); onAreasChange?.([]); setTouched({}); onDone?.(); }} className="rounded-md text-sm font-bold px-4 py-2 text-slate-600">{onDone ? 'Close' : 'Send another request'}</button>
             </div>
           </div>
         </div>
@@ -154,15 +145,16 @@ export const InquiryForm: React.FC<Props> = ({ showToast, onDone, variant = 'pag
         </Field>
       </div>
 
-      <Field id="area" error={errs.area} ok={!errs.area} shown={show('area')}>
-        <div id="f-area" role="radiogroup" aria-label="Primary area" tabIndex={-1} className="grid grid-cols-2 sm:grid-cols-3 gap-2 focus:outline-none">
-          {PRIMARY_AREAS.map((a, i) => {
-            const Icon = ICONS[i] || MoreHorizontal; const on = d.area === a;
+      <Field id="areas" error={errs.areas} ok={!errs.areas} shown={show('areas')}>
+        <p className="mb-1.5 text-xs text-slate-500">Select one or more. The first you pick is treated as the primary area.</p>
+        <div id="f-areas" role="group" aria-label="Areas that match your challenge" tabIndex={-1} className="grid grid-cols-2 gap-2 focus:outline-none sm:grid-cols-3">
+          {ALL_AREAS.map((a, i) => {
+            const Icon = ICONS[i % ICONS.length]; const idx = d.areas.indexOf(a); const on = idx >= 0;
             return (
-              <button type="button" key={a} role="radio" aria-checked={on} onClick={() => pickArea(a)}
-                className={`relative flex items-center gap-2 rounded-lg border px-3 py-3 text-left text-xs font-bold transition-all duration-200 ${on ? 'border-blue-600 bg-blue-50 text-blue-800 ring-2 ring-blue-200 scale-[1.02] shadow-sm' : 'border-[#D7EAF7] bg-white text-[#123B5D] hover:border-blue-300 hover:-translate-y-0.5 hover:shadow-sm'}`}>
-                <Icon className={`w-4 h-4 shrink-0 ${on ? 'text-blue-600' : 'text-slate-400'}`} /><span className="leading-tight pr-3">{a}</span>
-                {on && <Check className="anim-pop absolute top-1.5 right-1.5 w-3.5 h-3.5 text-blue-600" />}
+              <button type="button" key={a} role="checkbox" aria-checked={on} onClick={() => toggleArea(a)}
+                className={`relative flex items-center gap-2 rounded-lg border px-3 py-3 text-left text-xs font-bold transition-all duration-200 ${on ? 'scale-[1.02] border-blue-600 bg-blue-50 text-blue-800 shadow-sm ring-2 ring-blue-200' : 'border-[#D7EAF7] bg-white text-[#123B5D] hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-sm'}`}>
+                <Icon className={`h-4 w-4 shrink-0 ${on ? 'text-blue-600' : 'text-slate-400'}`} /><span className="pr-4 leading-tight">{a}</span>
+                {on && <span className="anim-pop absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-600 px-1 text-[10px] font-black text-white">{idx === 0 ? <Check className="h-3 w-3" /> : idx + 1}</span>}
               </button>
             );
           })}
@@ -172,8 +164,8 @@ export const InquiryForm: React.FC<Props> = ({ showToast, onDone, variant = 'pag
       <Field id="challenge" error={errs.challenge} ok={!errs.challenge} shown={show('challenge')}>
         <textarea id="f-challenge" ref={taRef} rows={variant === 'page' ? 6 : 5} maxLength={MAX} value={d.challenge} onChange={e => update('challenge', e.target.value)} onBlur={() => touch('challenge')} placeholder="A brief high-level description is sufficient..." className={`${base} ${tone(!errs.challenge, show('challenge') && !!errs.challenge)}`} />
         <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-xs">
-          {d.area && STARTERS[d.area]
-            ? <button type="button" onClick={insertStarter} className="inline-flex items-center gap-1 rounded-full bg-[#EAF6FD] px-3 py-1.5 font-bold text-blue-700 hover:bg-blue-100">Use a starter for “{d.area}” <ArrowRight className="w-3 h-3" /></button>
+          {d.areas.length
+            ? <button type="button" onClick={insertStarter} className="inline-flex items-center gap-1 rounded-full bg-[#EAF6FD] px-3 py-1.5 font-bold text-blue-700 hover:bg-blue-100">Use a starter for “{d.areas[0]}” <ArrowRight className="h-3 w-3" /></button>
             : <span className="text-slate-400">Pick an area above to get a starter sentence.</span>}
           <span className={d.challenge.length > MAX - 50 ? 'text-amber-600 font-bold' : 'text-slate-400'}>{d.challenge.length}/{MAX}</span>
         </div>
@@ -205,7 +197,7 @@ export const InquiryForm: React.FC<Props> = ({ showToast, onDone, variant = 'pag
             return (
               <li key={k} className="flex items-start gap-2.5 text-sm">
                 <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300 ${ok ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 text-transparent'}`}><Check className="w-3 h-3" /></span>
-                <span className="min-w-0"><span className="block text-[11px] font-bold uppercase tracking-wide text-slate-400">{LABELS[k]}</span><span className={`block truncate ${ok ? 'text-[#123B5D] font-semibold' : 'text-slate-300'}`}>{ok ? (k === 'challenge' ? d.challenge.trim().slice(0, 60) + (d.challenge.trim().length > 60 ? '…' : '') : d[k]) : 'Not yet added'}</span></span>
+                <span className="min-w-0"><span className="block text-[11px] font-bold uppercase tracking-wide text-slate-400">{LABELS[k]}</span><span className={`block truncate ${ok ? 'text-[#123B5D] font-semibold' : 'text-slate-300'}`}>{ok ? (k === 'challenge' ? d.challenge.trim().slice(0, 60) + (d.challenge.trim().length > 60 ? '…' : '') : k === 'areas' ? d.areas.join(', ') : d[k]) : 'Not yet added'}</span></span>
               </li>
             );
           })}

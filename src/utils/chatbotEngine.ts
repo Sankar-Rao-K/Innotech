@@ -58,7 +58,7 @@ function actionsFor(e: KBEntry): ChatAction[] {
     a.push({ type: 'link', label: 'Email us', url: `mailto:${COMPANY_DETAILS.email}` });
     a.push({ type: 'link', label: 'Call us', url: `tel:${COMPANY_DETAILS.phoneHref}` });
   }
-  if (['start', 'pricing', 'contact', 'human', 'models', 'svc-advisory', 'meeting', 'founder'].includes(e.id)) a.push({ type: 'consultation', label: 'Request an initial discussion' });
+  if (['start', 'pricing', 'contact', 'human', 'models', 'dd', 'meeting', 'founder', 'clients'].includes(e.id)) a.push({ type: 'consultation', label: 'Request an initial discussion' });
   return a;
 }
 
@@ -77,15 +77,22 @@ export function processUserQuery(rawInput: string): ChatMessage {
     return msg('Happy to go deeper. Which topic would you like more detail on?', { suggestions: SUGGESTIONS_DEFAULT });
   }
 
-  // 2) glossary: "what is X", "define X", or the bare term
-  const asksDefinition = /^(what is|what s|what are|define|meaning of|explain|whats)\b/.test(text) || (tokens.length <= 3 && content.length <= 2);
-  if (asksDefinition) {
-    const padded = ' ' + text + ' ';
-    const hit = GLOSSARY.find(g => g.keys.some(k => padded.includes(' ' + flat(k) + ' ')));
-    if (hit && !/innotech|you do|your/.test(text)) {
-      lastEntry = null;
-      return msg(hit.text, { suggestions: ['What services do you offer?', 'Browse publications', 'Contact the team'] });
-    }
+  // 2) glossary: an explicit definition question, or just the bare term ("CPV", "tech transfer")
+  const defPhrase = /^(what is|what s|what are|define|meaning of|explain|whats)\b/.test(text);
+  const hit = GLOSSARY.find(g => g.keys.some(k => {
+    const kw = flat(k).split(' ');
+    return defPhrase ? (' ' + text + ' ').includes(' ' + flat(k) + ' ') : content.length > 0 && content.length <= 2 && content.every(t => kw.includes(t));
+  }));
+  if (hit && !/innotech|you do|your/.test(text)) {
+    lastEntry = null;
+    return msg(hit.text, { suggestions: ['What services do you offer?', 'Browse publications', 'Contact the team'] });
+  }
+
+  // list requests
+  if (/\b(show|list|which|what|all)\b.*\bwhite ?papers?\b/.test(text)) {
+    const e = ENTRIES.find(x => x.id === 'whitepapers')!;
+    lastEntry = e;
+    return msg(e.answer, { actions: actionsFor(e), suggestions: e.follow || SUGGESTIONS_DEFAULT });
   }
 
   // 3) best knowledge-base match (publications weighted slightly lower than core entries)
@@ -102,7 +109,7 @@ export function processUserQuery(rawInput: string): ChatMessage {
 
   // 4) fallback
   lastEntry = null;
-  return msg("I'm not sure I understood that. I can help with InnoTech's services, expertise, frameworks, publications, the founder, or how to get in touch. You can also reach the team directly and they will be glad to help.", {
+  return msg("I'm not sure I understood that. I can help with InnoTech's services, expertise, who we work with, publications, the founder, or how to get in touch. You can also reach the team directly and they will be glad to help.", {
     actions: [{ type: 'consultation', label: 'Request an initial discussion' }, { type: 'route', label: 'Contact page', route: '/contact-us' }],
     suggestions: SUGGESTIONS_DEFAULT,
   });
@@ -110,6 +117,6 @@ export function processUserQuery(rawInput: string): ChatMessage {
 
 export const WELCOME: Omit<ChatMessage, 'id' | 'timestamp'> = {
   sender: 'bot',
-  text: "Hi! I'm the InnoTech assistant. Ask me about our **services**, **expertise**, **frameworks**, **publications** or how to get in touch.",
+  text: "Hi! I'm the InnoTech assistant. Ask me about our **services**, **expertise**, **who we work with**, **publications** or how to get in touch.",
   suggestions: SUGGESTIONS_DEFAULT,
 };

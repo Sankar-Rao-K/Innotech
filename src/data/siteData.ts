@@ -1,7 +1,7 @@
 // Company contact details (source: original site innotechbiopharm.com)
 export const COMPANY_DETAILS = {
   name: 'InnoTech BioPharm Solutions LLC',
-  tagline: 'Enterprise Pharmaceutical & Biotechnology Commercialization Advisory',
+  tagline: 'End-to-End Pharmaceutical Development, CMC & Commercialization Support',
   address: '111 Spencer Ln, Oswego, IL 60543, USA',
   addressShort: 'Oswego, IL, USA',
   phone: '+1 (774) 283-1540',

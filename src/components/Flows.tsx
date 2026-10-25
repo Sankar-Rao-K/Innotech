@@ -76,108 +76,65 @@ export const CountUp: React.FC<{ value: string; className?: string }> = ({ value
   return <span ref={ref} className={className}>{m[1]}{seen ? n : 0}{m[3]}</span>;
 };
 
-/* ---------- HOME 1: rail that draws itself with nodes popping in ---------- */
-export const FlowTrack: React.FC<{ items: string[] }> = ({ items }) => {
-  const [ref, seen] = useInView<HTMLDivElement>(0.35);
-  const n = items.length;
-  const side = `calc(50% / ${n})`;
-  return (
-    <div ref={ref} className="relative">
-      <div className="hidden md:block absolute top-6 h-1 rounded bg-blue-100" style={{ left: side, right: side }} />
-      <div className="hidden md:block absolute top-6 h-1 rounded bg-gradient-to-r from-blue-500 via-emerald-400 to-violet-500 origin-left" style={{ left: side, right: side, transform: seen ? 'scaleX(1)' : 'scaleX(0)', transition: `transform ${n * 260}ms ease-out` }}>
-        {seen && <span className="absolute -top-[7px] w-[18px] h-[18px] -ml-[9px] rounded-full bg-white border-[3px] border-blue-600 shadow anim-travel" style={{ animationDelay: `${n * 260}ms` }} />}
-      </div>
-      <div className="md:hidden absolute left-6 -ml-0.5 top-6 bottom-6 w-1 rounded bg-blue-100" />
-      <div className="md:hidden absolute left-6 -ml-0.5 top-6 bottom-6 w-1 rounded bg-gradient-to-b from-blue-500 to-violet-500 origin-top" style={{ transform: seen ? 'scaleY(1)' : 'scaleY(0)', transition: `transform ${n * 260}ms ease-out` }} />
-      <ol className="relative grid grid-cols-1 gap-5 md:gap-2 md:[grid-template-columns:repeat(var(--n),minmax(0,1fr))]" style={{ ['--n' as string]: n } as React.CSSProperties}>
-        {items.map((t, i) => (
-          <li key={t} className="flex md:flex-col items-center gap-4 md:gap-3 md:text-center">
-            <span className={`z-10 w-12 h-12 shrink-0 rounded-full bg-white border-4 flex items-center justify-center text-sm font-black shadow-md transition-all duration-500 ${seen ? 'border-blue-500 text-blue-700 scale-100 opacity-100' : 'border-slate-200 text-slate-300 scale-50 opacity-0'}`} style={{ transitionDelay: `${i * 260}ms` }}>{i + 1}</span>
-            <span className={`text-[13px] font-bold leading-snug text-[#123B5D] transition-all duration-500 ${seen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`} style={{ transitionDelay: `${i * 260 + 200}ms` }}>{t}</span>
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
-};
-
-/* ---------- HOME 2: interactive arrow stages with detail panel ---------- */
-export interface Stage { stage: string; area: string; color: string; detail: string }
-export const ChevronStages: React.FC<{ stages: Stage[] }> = ({ stages }) => {
+/* ---------- Interactive arrow stages (lifecycle strips). Optional detail panel. ---------- */
+export interface Stage { stage: string; area: string; color: string; detail?: string }
+export const ChevronStages: React.FC<{ stages: Stage[]; showDetail?: boolean; label?: string }> = ({ stages, showDetail = true, label = 'Stages' }) => {
   const [ref, seen] = useInView<HTMLDivElement>(0.3);
   const [auto, setAuto] = useState(true);
-  const [active, setActive] = useCycle(stages.length, seen && auto, 3200);
+  const [active, setActive] = useCycle(stages.length, seen && auto, 3000);
   const pick = (i: number) => { setAuto(false); setActive(i); };
   const s = stages[active];
+  const n = stages.length;
   return (
     <div ref={ref}>
-      <div className="grid grid-cols-4 md:grid-cols-8 gap-1 md:gap-0" role="tablist" aria-label="Enterprise commercialization stages">
+      <div className="grid grid-cols-4 gap-1 md:gap-0 md:[grid-template-columns:repeat(var(--n),minmax(0,1fr))]" style={{ ['--n' as string]: n } as React.CSSProperties} role="tablist" aria-label={label}>
         {stages.map((st, i) => (
           <div key={st.stage} className={i ? 'md:-ml-1.5' : ''} style={{ opacity: seen ? 1 : 0, transform: seen ? 'none' : 'translateX(-28px)', transition: 'all .7s cubic-bezier(.16,1,.3,1)', transitionDelay: `${i * 110}ms` }}>
-            <button role="tab" aria-selected={i === active} aria-label={`${st.stage} – ${st.area}`} onClick={() => pick(i)} onMouseEnter={() => pick(i)} onFocus={() => pick(i)} className="w-full text-center focus:outline-none group">
-              <span className={`flex h-14 sm:h-16 items-center justify-center text-white text-[10px] sm:text-xs font-extrabold tracking-wide transition-all duration-300 ${i === active ? 'scale-105 -translate-y-1 drop-shadow-lg' : 'opacity-80 group-hover:opacity-100'}`} style={{ background: st.color, clipPath: chevron(i === 0) }}>{st.stage}</span>
-              <span className={`mt-1.5 block text-[11px] font-semibold transition-colors ${i === active ? 'text-[#123B5D]' : 'text-slate-500'}`}>{st.area}</span>
-              <span className="mx-auto mt-1 block h-1 rounded-full transition-all duration-500" style={{ width: i === active ? '70%' : '0%', background: st.color }} />
+            <button role="tab" aria-selected={i === active} aria-label={`${st.stage}: ${st.area}`} onClick={() => pick(i)} onMouseEnter={() => pick(i)} onFocus={() => pick(i)} className="group w-full text-center focus:outline-none">
+              <span className={`flex h-12 sm:h-14 items-center justify-center text-white text-[10px] sm:text-xs font-extrabold tracking-wide transition-all duration-300 ${i === active ? 'scale-105 -translate-y-1 drop-shadow-lg' : 'opacity-85 group-hover:opacity-100'}`} style={{ background: st.color, clipPath: chevron(i === 0) }}>{st.stage}</span>
+              <span className={`mt-2 block px-0.5 text-[11px] sm:text-xs leading-tight transition-colors ${i === active ? 'font-bold text-[#0A2A7A]' : 'font-medium text-slate-500'}`}>{st.area}</span>
+              <span className="mx-auto mt-1.5 block h-1 rounded-full transition-all duration-500" style={{ width: i === active ? '70%' : '0%', background: st.color }} />
             </button>
           </div>
         ))}
       </div>
-      <div key={active} className="anim-fadein mt-5 bg-white border border-[#D7EAF7] rounded-xl p-5 flex gap-4 items-start" style={{ borderLeft: `6px solid ${s.color}` }} role="tabpanel">
-        <span className="text-3xl font-black leading-none" style={{ color: s.color }}>{String(active + 1).padStart(2, '0')}</span>
-        <div>
-          <h3 className="font-extrabold text-[#123B5D] text-lg">{s.stage} <span className="text-sm font-semibold text-slate-500">· {s.area}</span></h3>
-          <p className="text-sm mt-1 text-[#536B7D]">{s.detail}</p>
+      {showDetail && s.detail && (
+        <div key={active} className="anim-fadein mt-5 flex items-start gap-4 rounded-xl border border-[#D7EAF7] bg-white p-5" style={{ borderLeft: `6px solid ${s.color}` }} role="tabpanel">
+          <span className="text-3xl font-black leading-none" style={{ color: s.color }}>{String(active + 1).padStart(2, '0')}</span>
+          <div><h3 className="text-lg font-extrabold text-[#0A2A7A]">{s.stage} <span className="text-sm font-semibold text-slate-500">· {s.area}</span></h3><p className="mt-1 text-sm text-[#27407A]">{s.detail}</p></div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
 
-/* ---------- ABOUT 1: wavy relay path with a baton ---------- */
-export const RelayFlow: React.FC<{ items: string[] }> = ({ items }) => {
-  const [ref, seen] = useInView<HTMLDivElement>(0.4);
+/* ---------- ABOUT: chevrons that wipe in, drop a dotted pin to a marker, then reveal a caption ---------- */
+export const PinFlow: React.FC<{ items: { label: string; caption: string; color: string }[] }> = ({ items }) => {
+  const [ref, seen] = useInView<HTMLDivElement>(0.35);
   const n = items.length;
-  const colors = ['#1E88E5', '#00ACC1', '#2E9E4F', '#6A5ACD', '#8E5BD6'];
-  const d = 'M0 40 L100 40 C200 40 200 100 300 100 C400 100 400 40 500 40 C600 40 600 100 700 100 C800 100 800 40 900 40 L1000 40';
   return (
     <div ref={ref}>
-      <div className="hidden md:block relative h-[150px]">
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1000 140" preserveAspectRatio="none" aria-hidden="true">
-          <defs><linearGradient id="relayg" x1="0" x2="1"><stop offset="0" stopColor="#1E88E5" /><stop offset=".5" stopColor="#2E9E4F" /><stop offset="1" stopColor="#8E5BD6" /></linearGradient></defs>
-          <path d={d} fill="none" stroke="#D7EAF7" strokeWidth="3" strokeDasharray="6 8" vectorEffect="non-scaling-stroke" />
-          <path d={d} pathLength={1} fill="none" stroke="url(#relayg)" strokeWidth="4" strokeLinecap="round" strokeDasharray="1" strokeDashoffset={seen ? 0 : 1} vectorEffect="non-scaling-stroke" style={{ transition: 'stroke-dashoffset 2.6s ease-in-out' }} />
-        </svg>
-        {items.map((t, i) => (
-          <div key={t} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${((i + 0.5) / n) * 100}%`, top: `${(i % 2 ? 100 : 40) / 140 * 100}%` }}>
-            <span className={`block rounded-xl px-5 py-3 text-sm font-extrabold text-white shadow-lg transition-all duration-500 ${seen ? 'scale-100 opacity-100' : 'scale-50 opacity-0'}`} style={{ background: colors[i % colors.length], transitionDelay: `${i * 480}ms`, transitionTimingFunction: 'cubic-bezier(.34,1.56,.64,1)' }}>{t}</span>
-          </div>
-        ))}
-      </div>
-      <ol className="md:hidden flex flex-col items-center">
-        {items.map((t, i) => (
-          <React.Fragment key={t}>
-            <li className={`w-full max-w-xs text-center rounded-xl py-3 text-sm font-extrabold text-white shadow transition-all duration-500 ${seen ? 'translate-x-0 opacity-100' : (i % 2 ? 'translate-x-10' : '-translate-x-10') + ' opacity-0'}`} style={{ background: colors[i % colors.length], transitionDelay: `${i * 300}ms` }}>{t}</li>
-            {i < n - 1 && <span className={`h-6 w-0.5 border-l-2 border-dashed border-blue-300 transition-opacity duration-500 ${seen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: `${i * 300 + 150}ms` }} />}
-          </React.Fragment>
+      <ol className="hidden md:grid" style={{ gridTemplateColumns: `repeat(${n},minmax(0,1fr))` }}>
+        {items.map((it, i) => (
+          <li key={it.label} className="text-center">
+            <span className="relative flex h-11 items-center justify-center overflow-hidden text-[11px] font-extrabold tracking-wide text-white" style={{ background: it.color, clipPath: chevron(i === 0, 14), marginLeft: i ? -4 : 0 }}>
+              {it.label}
+              <span className="absolute inset-0 origin-right bg-white transition-transform ease-out" style={{ transform: seen ? 'scaleX(0)' : 'scaleX(1)', transitionDuration: '600ms', transitionDelay: `${i * 260}ms` }} />
+            </span>
+            <span className="mx-auto block w-0 border-l-2 border-dotted transition-all duration-500" style={{ height: seen ? 26 : 0, borderColor: it.color, transitionDelay: `${i * 260 + 400}ms` }} />
+            <span className={`mx-auto block h-5 w-5 rounded-full border-2 bg-white transition-all duration-500 ${seen ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`} style={{ borderColor: it.color, transitionDelay: `${i * 260 + 650}ms` }} />
+            <span className={`mt-2 block px-1 text-xs font-semibold leading-tight text-[#0A2A7A] transition-all duration-500 ${seen ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'}`} style={{ transitionDelay: `${i * 260 + 850}ms` }}>{it.caption}</span>
+          </li>
         ))}
       </ol>
-    </div>
-  );
-};
-
-/* ---------- ABOUT 2: cards whose top bar fills as they arrive ---------- */
-export const StepBars: React.FC<{ children: React.ReactNode[] }> = ({ children }) => {
-  const [ref, seen] = useInView<HTMLDivElement>(0.2);
-  const colors = ['#1E88E5', '#00ACC1', '#2E9E4F', '#6A5ACD', '#8E5BD6'];
-  return (
-    <div ref={ref} className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
-      {React.Children.map(children, (c, i) => (
-        <div className="relative rounded-lg overflow-hidden transition-all duration-700" style={{ opacity: seen ? 1 : 0, transform: seen ? 'none' : 'translateY(28px)', transitionDelay: `${i * 160}ms` }}>
-          <div className="absolute top-0 left-0 h-1 z-10 transition-all duration-1000" style={{ width: seen ? '100%' : '0%', background: colors[i % colors.length], transitionDelay: `${i * 160 + 300}ms` }} />
-          <div className="absolute top-3 right-3 z-10 text-xs font-black text-white bg-black/40 rounded px-1.5 py-0.5">0{i + 1}</div>
-          {c}
-        </div>
-      ))}
+      <ol className="space-y-2 md:hidden">
+        {items.map((it, i) => (
+          <li key={it.label} className="flex items-center gap-3 transition-all duration-500" style={{ opacity: seen ? 1 : 0, transform: seen ? 'none' : 'translateX(-24px)', transitionDelay: `${i * 160}ms` }}>
+            <span className="w-28 shrink-0 py-2.5 pl-3 text-[11px] font-extrabold tracking-wide text-white" style={{ background: it.color, clipPath: chevron(i === 0, 12) }}>{it.label}</span>
+            <span className="text-xs font-semibold text-[#0A2A7A]">{it.caption}</span>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 };
@@ -253,51 +210,6 @@ export const LeadershipSteps: React.FC<{ items: { label: string; desc: string }[
   );
 };
 
-/* ---------- WHO WE WORK WITH: wipe-in arrow journey ---------- */
-export const JourneyArrows: React.FC<{ items: string[] }> = ({ items }) => {
-  const [ref, seen] = useInView<HTMLDivElement>(0.35);
-  const colors = ['#1E88E5', '#2E9E4F', '#F5A300', '#F2622A', '#6A3FB5'];
-  const n = items.length;
-  return (
-    <div ref={ref}>
-      <ol className="hidden md:grid gap-0" style={{ gridTemplateColumns: `repeat(${n},minmax(0,1fr))` }}>
-        {items.map((t, i) => (
-          <li key={t} className="text-center">
-            <span className={`block text-xs font-extrabold px-1 h-9 text-[#123B5D] transition-all duration-500 ${seen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'}`} style={{ transitionDelay: `${i * 300}ms` }}>{t}</span>
-            <span className="mx-auto block w-px h-4 bg-slate-300" />
-            <span className="relative block h-14 overflow-hidden" style={{ background: colors[i % colors.length], clipPath: chevron(i === 0, 22), marginLeft: i ? -6 : 0 }}>
-              <span className="absolute inset-0 bg-white origin-right transition-transform ease-out" style={{ transform: seen ? 'scaleX(0)' : 'scaleX(1)', transitionDuration: '700ms', transitionDelay: `${i * 300 + 150}ms` }} />
-            </span>
-          </li>
-        ))}
-      </ol>
-      <ol className="md:hidden space-y-2">
-        {items.map((t, i) => (
-          <li key={t} className="relative overflow-hidden rounded-lg bg-white border border-[#D7EAF7] pl-4 pr-3 py-3 text-sm font-bold text-[#123B5D]">
-            <span className="absolute left-0 top-0 bottom-0 w-1.5 transition-all duration-700" style={{ background: colors[i % colors.length], transform: seen ? 'scaleY(1)' : 'scaleY(0)', transitionDelay: `${i * 250}ms`, transformOrigin: 'top' }} />
-            <span className={`transition-all duration-500 ${seen ? 'opacity-100' : 'opacity-0'}`} style={{ transitionDelay: `${i * 250 + 150}ms` }}>{t}</span>
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
-};
-
-/* ---------- SERVICES hero: shimmering chips ---------- */
-export const ShimmerChips: React.FC<{ items: string[] }> = ({ items }) => {
-  const [ref, seen] = useInView<HTMLOListElement>(0.5);
-  return (
-    <ol ref={ref} className="flex flex-wrap gap-2">
-      {items.map((t, i) => (
-        <li key={t} className={`relative overflow-hidden rounded-md px-4 py-2 text-xs font-extrabold tracking-wide text-[#0B2A5B] transition-all duration-500 ${seen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`} style={{ background: PALETTE[i % PALETTE.length] + '33', transitionDelay: `${i * 130}ms`, border: `1px solid ${PALETTE[i % PALETTE.length]}66`, color: '#fff' }}>
-          {t}
-          {seen && <span className="pointer-events-none absolute inset-y-0 w-1/3 bg-white/30 -skew-x-12 anim-shimmer" style={{ animationDelay: `${i * 220}ms` }} />}
-        </li>
-      ))}
-    </ol>
-  );
-};
-
 /* ---------- SERVICES 02: running highlight along a chevron strip ---------- */
 export const ChevronRun: React.FC<{ items: string[] }> = ({ items }) => {
   const [ref, seen] = useInView<HTMLDivElement>(0.4);
@@ -306,21 +218,6 @@ export const ChevronRun: React.FC<{ items: string[] }> = ({ items }) => {
     <div ref={ref} className="flex flex-wrap gap-y-1.5">
       {items.map((t, i) => (
         <span key={t} className="relative inline-flex h-10 items-center justify-center px-5 text-[11px] font-extrabold tracking-wide text-white transition-all duration-300" style={{ background: PALETTE[i % PALETTE.length], clipPath: chevron(i === 0, 10), marginLeft: i ? -4 : 0, opacity: seen ? (i === active ? 1 : 0.45) : 0, transform: i === active ? 'translateY(-3px) scale(1.06)' : 'none', zIndex: i === active ? 2 : 1, transitionDelay: seen ? '0ms' : `${i * 90}ms` }}>{t}</span>
-      ))}
-    </div>
-  );
-};
-
-/* ---------- SERVICES 03: maturity bars growing upward ---------- */
-export const MaturityBars: React.FC<{ items: string[] }> = ({ items }) => {
-  const [ref, seen] = useInView<HTMLDivElement>(0.4);
-  const cols = ['#EF5350', '#FFA726', '#FDD835', '#66BB6A', '#26A69A'];
-  return (
-    <div ref={ref} className="flex items-end gap-2 h-36">
-      {items.map((t, i) => (
-        <div key={t} className="flex-1 flex flex-col justify-end h-full">
-          <div className="rounded-t-md flex items-start justify-center pt-1.5 text-[10px] font-extrabold text-[#123B5D] overflow-hidden transition-all duration-700 ease-out" style={{ height: seen ? `${28 + i * 18}%` : '0%', background: cols[i % cols.length], transitionDelay: `${i * 170}ms` }}>{t}</div>
-        </div>
       ))}
     </div>
   );
@@ -338,35 +235,6 @@ export const ProgressPills: React.FC<{ items: string[] }> = ({ items }) => {
         </li>
       ))}
     </ol>
-  );
-};
-
-/* ---------- SERVICES 07: circular loop ---------- */
-export const CycleLoop: React.FC<{ items: string[] }> = ({ items }) => {
-  const [ref, seen] = useInView<HTMLDivElement>(0.4);
-  const [active] = useCycle(items.length, seen, 1200);
-  const n = items.length, R = 78, C = 110;
-  return (
-    <div ref={ref} className="flex justify-center">
-      <svg viewBox="0 0 220 220" className="w-full max-w-[260px]" role="img" aria-label={`Cycle: ${items.join(', ')}`}>
-        <circle cx={C} cy={C} r={R} fill="none" stroke="#D7EAF7" strokeWidth="3" strokeDasharray="4 6" />
-        <circle cx={C} cy={C} r={R} fill="none" stroke="#2F9FEA" strokeWidth="4" strokeLinecap="round" pathLength={1} strokeDasharray="1" strokeDashoffset={seen ? 0 : 1} style={{ transition: 'stroke-dashoffset 2.4s ease-in-out', transform: 'rotate(-90deg)', transformOrigin: 'center' }} />
-        {items.map((t, i) => {
-          const a = (i / n) * Math.PI * 2 - Math.PI / 2;
-          const x = C + R * Math.cos(a), y = C + R * Math.sin(a);
-          const on = seen && i === active;
-          return (
-            <g key={t} style={{ transformOrigin: `${x}px ${y}px`, transform: seen ? 'scale(1)' : 'scale(0)', transition: 'transform .5s cubic-bezier(.34,1.56,.64,1)', transitionDelay: `${i * 250}ms` }}>
-              <circle cx={x} cy={y} r={on ? 15 : 12} fill={on ? '#0B3C8C' : '#fff'} stroke={PALETTE[i % PALETTE.length]} strokeWidth="3" style={{ transition: 'all .3s' }} />
-              <text x={x} y={y + 3.5} textAnchor="middle" fontSize="10" fontWeight="800" fill={on ? '#fff' : '#123B5D'}>{i + 1}</text>
-              <text x={C + (R + 30) * Math.cos(a)} y={C + (R + 28) * Math.sin(a) + 3} textAnchor="middle" fontSize="9" fontWeight="700" fill="#123B5D">{t}</text>
-            </g>
-          );
-        })}
-        <text x={C} y={C - 2} textAnchor="middle" fontSize="11" fontWeight="800" fill="#0B3C8C">RECOVERY</text>
-        <text x={C} y={C + 12} textAnchor="middle" fontSize="9" fill="#536B7D">cycle</text>
-      </svg>
-    </div>
   );
 };
 
@@ -451,7 +319,7 @@ export const Conveyor: React.FC<{ items: string[] }> = ({ items }) => {
 };
 
 /* ---------- CONTACT: cards joined by drawing arrows ---------- */
-export const DashConnect: React.FC<{ children: React.ReactNode[] }> = ({ children }) => {
+export const DashConnect: React.FC<{ children: React.ReactNode[]; compact?: boolean }> = ({ children, compact }) => {
   const [ref, seen] = useInView<HTMLDivElement>(0.3);
   const kids = React.Children.toArray(children);
   return (
@@ -460,8 +328,8 @@ export const DashConnect: React.FC<{ children: React.ReactNode[] }> = ({ childre
         <React.Fragment key={i}>
           <div className="flex-1 transition-all duration-700" style={{ opacity: seen ? 1 : 0, transform: seen ? 'none' : 'translateY(24px)', transitionDelay: `${i * 450}ms` }}>{c}</div>
           {i < kids.length - 1 && (
-            <div className="flex items-center justify-center md:w-14 h-8 md:h-auto" aria-hidden="true">
-              <svg viewBox="0 0 40 20" className="w-10 md:w-12 rotate-90 md:rotate-0"><path d="M2 10 H32" stroke="#2F9FEA" strokeWidth="3" strokeLinecap="round" strokeDasharray="1" pathLength={1} strokeDashoffset={seen ? 0 : 1} style={{ transition: 'stroke-dashoffset .6s ease', transitionDelay: `${i * 450 + 350}ms` }} /><path d="M26 3 L36 10 L26 17" fill="none" stroke="#2F9FEA" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: seen ? 1 : 0, transition: 'opacity .3s', transitionDelay: `${i * 450 + 800}ms` }} /></svg>
+            <div className={`flex items-center justify-center h-8 md:h-auto ${compact ? 'md:w-7' : 'md:w-14'}`} aria-hidden="true">
+              <svg viewBox="0 0 40 20" className={`w-10 rotate-90 md:rotate-0 ${compact ? 'md:w-7' : 'md:w-12'}`}><path d="M2 10 H32" stroke="#2F9FEA" strokeWidth="3" strokeLinecap="round" strokeDasharray="1" pathLength={1} strokeDashoffset={seen ? 0 : 1} style={{ transition: 'stroke-dashoffset .6s ease', transitionDelay: `${i * 450 + 350}ms` }} /><path d="M26 3 L36 10 L26 17" fill="none" stroke="#2F9FEA" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: seen ? 1 : 0, transition: 'opacity .3s', transitionDelay: `${i * 450 + 800}ms` }} /></svg>
             </div>
           )}
         </React.Fragment>

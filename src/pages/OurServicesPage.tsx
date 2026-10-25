@@ -1,71 +1,67 @@
 import React from 'react';
-import { Hero, img } from '../components/Ui';
+import { Hero, SectionHead, TintTile, TINTS, BtnPrimary, img, NAVY } from '../components/Ui';
 import { AnimateOnScroll } from '../components/AnimateOnScroll';
-import { ShimmerChips, ChevronRun, MaturityBars, ProgressPills, CycleLoop } from '../components/Flows';
+import { ChevronRun, ProgressPills } from '../components/Flows';
 
-type ListBlock = [string, string[]];
-interface Service { n: string; t: string; d: string; images: string[]; lists?: ListBlock[]; flow?: React.ReactNode; extra?: string }
-
+interface Service { n: string; color: string; title: string; lead: string; detail: string; image: string; flow?: React.ReactNode }
 const SERVICES: Service[] = [
-  { n: '01', t: 'Commercialization Readiness Assessments', d: 'Independent, structured reviews to determine whether the product, process, manufacturing organization, evidence, and governance are ready for the next critical milestone.', images: ['svc-1'],
-    lists: [['Available assessments:', ['CMC Readiness', 'Technology Transfer Readiness', 'Manufacturing Readiness', 'PPQ Readiness', 'Technical Launch Readiness', 'Technical Operations Health Check', 'CDMO Readiness']], ['Typical output:', ['Executive readiness view', 'Critical gaps and risk priorities', 'Decision points and owners', '30/60/90-day actions']]] },
-  { n: '02', t: 'Technology Transfer & Commercialization Execution', d: 'Support the end-to-end transition from sending-site knowledge to receiving-site manufacturing capability.', images: ['svc-2'],
-    flow: <ChevronRun items={['Plan', 'Capture Knowledge', 'Assess Receiving-Site Fit', 'Close Gaps', 'Build Readiness', 'Demonstrate', 'Validate', 'Launch', 'Sustain']} />,
-    extra: 'Support may include transfer strategy, risk assessment, process/equipment fit, knowledge-transfer structure, readiness reviews, engineering/scale-up support, validation preparation, and early commercial stabilization.' },
-  { n: '03', t: 'MS&T & Technical Operations Transformation', d: 'Assess and strengthen the operating model for technical stewardship across commercial manufacturing.', images: ['svc-3'],
-    flow: <MaturityBars items={['Reactive', 'Stable', 'Proactive', 'Predictive', 'Leading']} />,
-    extra: 'Areas include organization design, process stewardship, technical governance, CPV, knowledge management, deviation/trend understanding, lifecycle improvement, and interface with Manufacturing, Quality, Engineering, Regulatory, and Supply.' },
-  { n: '04', t: 'Validation, PPQ & Technical Launch', d: 'Connect process validation with broader commercialization readiness.', images: ['svc-4'],
-    flow: <ProgressPills items={['Process Understanding', 'Manufacturing Readiness', 'PPQ Readiness', 'Validation', 'Technical Launch', 'Initial Commercial Supply']} />,
-    extra: 'PPQ Demonstrates the Process. Commercialization Demonstrates the System.' },
-  { n: '05', t: 'Specialized Products & Delivery Systems', d: 'Focused support for complex oral and modified-release products, sterile ophthalmics, injectables/LAIs, and drug-device combination products. Engagements may address scale-up, technology transfer, manufacturing readiness, validation, launch, lifecycle, and technical recovery.', images: ['svc-5a', 'svc-5b', 'svc-5c', 'svc-5d'],
-    lists: [['', ['Complex oral and modified-release products', 'Sterile ophthalmic solutions', 'Injectables and long-acting injectables (LAIs)', 'Drug-device combination products', 'Product, process, and site-specific support']]] },
-  { n: '06', t: 'AI & Digital Transformation', d: 'Help pharmaceutical organizations identify where AI and digital technologies can improve technical decisions, knowledge transfer, manufacturing insight, and commercialization performance—while preserving appropriate scientific, Quality, and GxP accountability.', images: ['svc-6'],
-    lists: [['', ['AI Opportunity & Readiness', 'AI-Assisted QbD', 'AI-Assisted Technology Transfer', 'Digital Twins', 'MES', 'Knowledge Management', 'Manufacturing Intelligence', 'Good AI Practice']], ['Opportunity screen:', ['Business Value', 'Technical Feasibility', 'Data Readiness', 'GxP Risk']]], extra: 'Pharmaceutical Expertise First. Digital Technology Applied with Purpose.' },
-  { n: '07', t: 'Executive Advisory, Due Diligence & Recovery', d: 'Independent support for leadership teams, boards, investors, transactions, difficult technical programs, or manufacturing situations requiring rapid clarity.', images: ['svc-7'],
-    flow: <CycleLoop items={['Stabilize', 'Diagnose', 'Prioritize', 'Remediate', 'Verify', 'Sustain']} />,
-    extra: 'The objective is to understand the technical risk, quantify the business consequence, establish decision priorities, and build a practical path forward.' },
+  { n: '01', color: '#0F9D9A', title: 'CMC Development & Product Development Support', lead: 'Support emerging biotech, small pharma and other organizations in building a practical, phase-appropriate CMC development path.', detail: 'Potential scope: CMC strategy, formulation/process development support, QbD / DoE, process optimization, control strategy, scale-up, analytical/stability strategy coordination, development planning, regulatory CMC / Module 3 support, vendor/CDMO oversight.', image: 'svc-1a' },
+  { n: '02', color: '#0F9D9A', title: 'Project Leadership & Project Execution', lead: 'Provide experienced technical leadership to convert strategy into an executable program.', detail: 'Support may include integrated project plans, technical workstream leadership, CRO/CDMO coordination, risk registers, milestone management, cross-functional decision-making, meeting leadership, technical issue resolution and executive escalation.', image: 'svc-2' },
+  { n: '03', color: '#F97316', title: 'On-Site Technical & Manufacturing Support', lead: 'Provide hands-on support at client, CDMO or manufacturing sites when critical milestones require experienced technical presence.', detail: 'Potential support: scale-up and engineering batches, equipment/process fit, technology transfer, manufacturing troubleshooting, investigations, validation / PPQ execution support, launch support, early commercial stabilization.', image: 'svc-4' },
+  { n: '04', color: '#2563EB', title: 'Technology Transfer & Manufacturing Readiness', lead: 'Support the end-to-end transition from sending-site knowledge to receiving-site manufacturing capability.', detail: 'Support may include transfer strategy, risk assessment, process/equipment fit, knowledge-transfer structure, readiness reviews, engineering/scale-up support, validation preparation and early commercial stabilization.', image: 'exp-5',
+    flow: <ChevronRun items={['Plan', 'Capture Knowledge', 'Assess Receiving-Site Fit', 'Close Gaps', 'Build Readiness', 'Demonstrate', 'Validate', 'Launch', 'Sustain']} /> },
+  { n: '05', color: '#EC4899', title: 'MS&T & Technical Operations Support', lead: 'Support or strengthen the technical stewardship required across commercial manufacturing.', detail: 'Areas include process stewardship, technical governance, CPV, knowledge management, escalation, technical investigations, troubleshooting, process improvement, lifecycle change and interfaces with Manufacturing, Quality, Engineering, Regulatory and Supply.', image: 'svc-3' },
+  { n: '06', color: '#9333EA', title: 'Validation, PPQ & Commercial Launch', lead: 'Connect process validation with broader commercialization readiness.', detail: 'Support may include validation strategy, readiness review, PPQ planning/execution support, issue management, technical launch readiness and initial commercial stabilization.', image: 'svc-5',
+    flow: <ProgressPills items={['Process Understanding', 'Manufacturing Readiness', 'PPQ Readiness', 'Validation', 'Technical Launch', 'Initial Commercial Supply']} /> },
+  { n: '07', color: '#16A34A', title: 'Specialized Product Development & Commercialization', lead: 'Experience includes complex oral and modified-release products, sterile ophthalmic solutions, injectables/LAIs and drug-device combination products.', detail: 'Engagements may address development, process optimization, scale-up, technology transfer, manufacturing readiness, validation, launch/lifecycle management and technical recovery.', image: 'svc-6' },
+  { n: '08', color: '#F5B000', title: 'Lifecycle Management & Post-Approval Support', lead: 'Support products after launch as manufacturing knowledge, regulatory commitments, sites, equipment, processes and supply requirements evolve.', detail: 'Areas include CPV, process optimization, post-approval CMC change support, site / equipment changes, product transfers, manufacturing troubleshooting, cost & productivity improvement, supply continuity and technical risk management.', image: 'svc-7' },
+];
+const MODELS: [string, string][] = [
+  ['ADVISORY', 'Independent technical or strategic guidance.'], ['PROJECT-BASED', 'Defined scope, deliverables and milestones.'], ['PROGRAM LEADERSHIP', 'Lead or coordinate a technical / CMC workstream or broader program.'],
+  ['EMBEDDED / FRACTIONAL SUPPORT', 'Operate as an extension of the client’s technical organization.'], ['ON-SITE SUPPORT', 'Experienced technical support at development, CDMO or manufacturing sites.'], ['EXECUTION & RECOVERY', 'Hands-on support for development, transfers, scale-up, PPQ, launch, investigations or troubled programs.'],
 ];
 
 export const OurServicesPage: React.FC<{ navigate: (r: string) => void; openConsultationModal: () => void }> = ({ openConsultationModal }) => (
-  <div className="font-sans text-[#536B7D] bg-white">
-    <Hero title="Services" accent="Advisory Support from Development to Commercial Supply" image="svc-hero" imageAlt="Advisor and scientist reviewing a manufacturing vessel">
-      <p className="text-lg font-bold text-white">What can you hire InnoTech to do?</p>
-      <ShimmerChips items={['ASSESS', 'STRATEGIZE', 'BUILD', 'EXECUTE', 'RECOVER', 'SUSTAIN']} />
+  <div className="font-sans bg-white">
+    <Hero image="svc-3a" imageAlt="Technician and scientists beside a vial filling line" title="Services" sub="End-to-End Support from Development through Commercialization & Lifecycle Management">
+      <p>InnoTech provides flexible technical support matched to the needs of each program—from focused advisory and CMC development support to project leadership, hands-on execution, on-site manufacturing support and lifecycle Technical Operations.</p>
     </Hero>
 
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+    <section className="border-b border-[#D7EAF7] bg-white py-5">
+      <div className="mx-auto flex max-w-7xl flex-col items-start gap-4 px-4 sm:px-6 lg:flex-row lg:items-center lg:gap-8 lg:px-8">
+        <div className="min-w-0 flex-1"><ChevronRun items={['ADVISE', 'DEVELOP', 'PLAN', 'EXECUTE', 'TRANSFER', 'VALIDATE', 'LAUNCH', 'SUSTAIN']} /></div>
+        <BtnPrimary onClick={openConsultationModal} className="shrink-0">Discuss an Engagement</BtnPrimary>
+      </div>
+    </section>
+
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       {SERVICES.map(s => (
         <AnimateOnScroll key={s.n} type="fade-up">
-          <section className="border-b border-[#D7EAF7] pb-10 grid lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-4">
-              <div className="flex gap-3 items-start"><span className="text-4xl font-black text-blue-600 leading-none">{s.n}</span><h2 className="text-xl font-black text-blue-800">{s.t}</h2></div>
-              <p className="text-sm sm:text-base mt-3">{s.d}</p>
+          <section id={`svc-${Number(s.n)}`} className="grid scroll-mt-28 items-center gap-5 border-b border-[#D7EAF7] py-7 md:grid-cols-[minmax(0,1fr)_minmax(0,0.62fr)] md:gap-8">
+            <div>
+              <div className="flex items-start gap-3 sm:gap-4">
+                <span className="text-4xl font-black leading-none sm:text-5xl" style={{ color: s.color }}>{s.n}</span>
+                <div><h2 className={`text-lg font-black leading-snug sm:text-2xl ${NAVY}`}>{s.title}</h2><p className={`mt-1.5 text-sm font-medium leading-relaxed sm:text-base ${NAVY}`}>{s.lead}</p></div>
+              </div>
+              {s.flow && <div className="mt-4 sm:ml-[68px]">{s.flow}</div>}
+              <p className="mt-3 text-sm leading-relaxed text-[#27407A] sm:ml-[68px] sm:text-base">{s.detail}</p>
             </div>
-            <div className={`lg:col-span-3 grid gap-2 content-start ${s.images.length > 1 ? 'grid-cols-4 lg:grid-cols-2' : ''}`}>
-              {s.images.map(i => <img key={i} src={img(i)} alt="" loading="lazy" className="rounded-lg w-full h-36 lg:h-44 object-cover" />)}
-            </div>
-            <div className="lg:col-span-5 space-y-4">
-              {s.flow}
-              {s.lists && <div className="grid sm:grid-cols-2 gap-3">{s.lists.map(([h, l]) => (
-                <div key={h + l[0]} className="bg-[#F5FAFE] border border-[#D7EAF7] rounded-lg p-4">
-                  {h && <h3 className="text-xs font-bold text-[#123B5D] mb-1.5">{h}</h3>}
-                  <ul className="list-disc pl-4 text-xs sm:text-[13px] space-y-0.5">{l.map(i => <li key={i}>{i}</li>)}</ul>
-                </div>))}</div>}
-              {s.extra && <p className="text-sm sm:text-base">{s.extra}</p>}
-            </div>
+            <img src={img(s.image)} alt={s.title} loading="lazy" className="h-48 w-full rounded-xl object-cover shadow-sm sm:h-56" />
           </section>
         </AnimateOnScroll>
       ))}
     </div>
 
-    <section className="bg-[#F5FAFE] py-10"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 className="text-2xl font-black text-blue-700">Engagement Models</h2>
-      <p className="text-sm mb-4">Engagement scope is matched to the decision, milestone, risk, and capability required.</p>
-      <div className="flex flex-wrap gap-2 items-center">
-        {['Executive Advisory', 'Readiness Assessment', 'Program Support', 'Independent Review', 'Technical Recovery', 'Capability Building'].map(m => <span key={m} className="bg-white border border-[#D7EAF7] text-xs font-bold text-blue-800 rounded-md px-3 py-2">{m}</span>)}
-        <button onClick={openConsultationModal} className="sm:ml-auto w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-5 py-2.5 rounded-md">Discuss an Engagement</button>
+    <section className="bg-[#EAF3FC] py-10 sm:py-14">
+      <div className="mx-auto grid max-w-7xl items-center gap-6 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:px-8">
+        <div>
+          <SectionHead title="Flexible Engagement Models" sub="Engagement scope is matched to the product stage, milestone, technical risk, internal capability and required level of execution." />
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {MODELS.map(([t, d], i) => <AnimateOnScroll key={t} type="fade-up" delay={(i % 3) * 0.07}><TintTile tint={TINTS[[0, 1, 3, 2, 5, 2][i]]} title={t} text={d} /></AnimateOnScroll>)}
+          </div>
+        </div>
+        <BtnPrimary onClick={openConsultationModal} className="w-full lg:w-auto">Discuss an Engagement</BtnPrimary>
       </div>
-    </div></section>
+    </section>
   </div>
 );

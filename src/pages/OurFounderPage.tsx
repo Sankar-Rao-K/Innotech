@@ -1,49 +1,76 @@
 import React from 'react';
-import { Hero, Section, Card, Cta, img } from '../components/Ui';
+import { FileCheck, Globe, Pill, TrendingUp, Users } from 'lucide-react';
+import { Hero, Section, SectionHead, TintTile, TINTS, BtnPrimary, Cta, img, NAVY } from '../components/Ui';
+import { AnimateOnScroll } from '../components/AnimateOnScroll';
 import { CareerTimeline, LeadershipSteps, CountUp } from '../components/Flows';
-import { FOUNDER_STATS, CAREER } from '../data/commercialization';
-import { PUBLICATIONS, FEATURED, formatDate } from '../data/publications';
 
-export const OurFounderPage: React.FC<{ navigate: (r: string) => void; openConsultationModal: () => void }> = ({ navigate, openConsultationModal }) => (
-  <div className="font-sans text-[#536B7D] bg-white">
-    <Hero
-      reverse
-      aside={<img src={img('founder')} alt="Raj Thota, Founder & Principal Advisor" className="relative mx-auto w-64 sm:w-80 rounded-2xl border border-white/20 shadow-2xl object-cover" />}
-      title={<>Raj Thota, <span className="text-xl sm:text-2xl font-bold text-blue-100">MBA, MS (Pharmaceutics)</span></>}
-      accent="Founder & Principal Advisor"
-    >
-      <p className="text-lg font-bold text-cyan-200">Enterprise Pharmaceutical &amp; Biotechnology Commercialization Executive</p>
-      <p className="text-lg sm:text-xl font-extrabold text-white">From Pharmaceutical Development to Enterprise Commercialization Leadership</p>
-      <p>Raj Thota brings nearly three decades of experience connecting pharmaceutical development, CMC, Technical Operations, manufacturing, and commercialization. His perspective combines scientific and technical depth with operating leadership, global external manufacturing, regulatory readiness, and business accountability.</p>
+const CAREER = [
+  { label: 'DEVELOPMENT', note: 'Pharmaceutical Development' },
+  { label: 'CMC', note: 'CMC & Global External Manufacturing' },
+  { label: 'MS&T', note: 'Process stewardship' },
+  { label: 'TECHNICAL OPERATIONS', note: 'Process Development & Commercialization' },
+  { label: 'MANUFACTURING LEADERSHIP', note: 'Site Head / General Management' },
+  { label: 'ENTERPRISE COMMERCIALIZATION', note: 'Executive advisory' },
+];
+const IMPACT: [React.ComponentType<{ className?: string }>, string, string][] = [
+  [Pill, '150+', 'Commercialized Products Supported'], [FileCheck, '41', 'FDA Product Approvals'], [Users, '$5B+', 'Technical M&A Due Diligence'],
+  [Globe, 'Global', 'Manufacturing & CDMO Leadership'], [TrendingUp, 'Nearly Three Decades', 'Across the Product Lifecycle'],
+];
+const EXPERTISE: [string, string][] = [
+  ['CMC & Pharmaceutical Development', 'Formulation, process development, QbD, scale-up and commercial readiness.'],
+  ['Process Development, Scale-Up & Commercialization', 'Translate development knowledge into scalable, controllable and commercially viable processes.'],
+  ['MS&T & Technical Operations', 'Build process stewardship, technical governance, manufacturing science and lifecycle capability.'],
+  ['Technology Transfer & Manufacturing Readiness', 'Transfer product and process knowledge into reproducible receiving-site capability.'],
+  ['Validation, Launch & Lifecycle Management', 'Support PPQ, commercial launch and ongoing lifecycle performance.'],
+  ['Specialized Products, AI & Digital Transformation', 'Support complex oral products, sterile ophthalmics, injectables, LAIs, drug-device combination products and apply digital tools to strengthen decisions.'],
+  ['Technical Due Diligence & Executive Advisory', 'Integrate technical, manufacturing and commercial perspectives for investment, partnering and strategic decision-making.'],
+];
+const THOUGHT: [string, string, string][] = [
+  ['The Evolution of QbD', 'ab2-2', '/insights/evolution-of-qbd'],
+  ['Good AI Practice in Pharma & Biotech', 'ab2-3', '/insights/good-ai-practice'],
+  ['Technical Due Diligence for Pharma & Biotech Investment', 'ab2-3a', '/insights/investor-technical-due-diligence'],
+  ['Commercializing Sterile Ophthalmic Eye Drops', 'ab2-7', '/insights/commercializing-sterile-ophthalmic-eye-drops'],
+  ['From Small Molecules to Biologics', 'ab2-5', '/insights/small-molecules-to-biologics'],
+];
+
+export const OurFounderPage: React.FC<{ navigate: (r: string) => void; openConsultationModal: () => void }> = ({ navigate }) => (
+  <div className="font-sans bg-white">
+    <Hero variant="portrait" image="ab2-1" imageAlt="Raj Thota, Founder & Principal Advisor"
+      title={<>Raj Thota, <span className="text-2xl sm:text-3xl">MBA, MS (Pharmaceutics)</span></>}>
+      <p className="text-xl font-medium text-[#0A2A7A]">Founder &amp; Principal Advisor</p>
+      <span className="block h-0.5 w-12 bg-emerald-500" />
+      <p className="text-lg sm:text-xl font-extrabold leading-snug text-[#0A2A7A]">Enterprise Pharmaceutical &amp; Biotechnology Development and Commercialization Executive</p>
+      <p className="text-base sm:text-lg font-extrabold leading-snug text-[#0A2A7A]">From Pharmaceutical Development to Enterprise Commercialization Leadership</p>
+      <p>Raj&rsquo;s career connects pharmaceutical development, CMC, MS&amp;T, Technical Operations, manufacturing, technology transfer, commercialization, operating leadership, external manufacturing and executive decision-making.</p>
     </Hero>
 
-    <Section title="A Career Built Across the Product Lifecycle" sub="Scientific and Technical Depth. Manufacturing Leadership. Business Accountability. Enterprise Perspective.">
+    <Section title="A Career Built Across the Product Lifecycle">
       <CareerTimeline items={CAREER} />
-      <p className="mt-8 rounded-xl border border-[#D7EAF7] bg-[#F5FAFE] p-5 text-sm sm:text-base text-[#123B5D] font-medium">This progression created an enterprise perspective on a recurring industry challenge: how to convert development knowledge into a process, organization, and manufacturing system capable of delivering reliable commercial supply.</p>
+      <p className="mx-auto mt-8 max-w-3xl text-center text-sm sm:text-base text-[#27407A]">This progression created an enterprise perspective on converting development knowledge into process capability, manufacturing systems, organizational readiness and reliable supply.</p>
     </Section>
 
-    <section className="relative bg-[#0B2A5B] text-white py-12 overflow-hidden">
-      <img src={img('who-cta')} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover opacity-20" />
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl sm:text-3xl font-black">Selected Career Experience</h2>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-6">
-          {FOUNDER_STATS.map(([n, l], i) => (
-            <div key={n} className={`bg-emerald-100 text-[#123B5D] rounded-md text-center py-4 px-2 ${i === 4 ? 'col-span-2 md:col-span-1' : ''}`}>
-              <CountUp value={n} className="block text-2xl font-black" /><div className="text-xs font-semibold">{l}</div>
-            </div>
+    <section className="relative overflow-hidden bg-[#EAF3FC] py-10 sm:py-14">
+      <img src={img('ab3-3a')} alt="" aria-hidden="true" className="absolute inset-y-0 right-0 h-full w-2/3 object-cover opacity-25 [mask-image:linear-gradient(to_right,transparent,#000)] [-webkit-mask-image:linear-gradient(to_right,transparent,#000)]" />
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <SectionHead title="Selected Career Impact" />
+        <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-5">
+          {IMPACT.map(([Icon, n, l], i) => (
+            <AnimateOnScroll key={n} type="fade-up" delay={i * 0.07} className={i === 4 ? 'col-span-2 md:col-span-1' : ''}>
+              <div className="flex h-full items-center gap-3 rounded-xl border border-[#D7EAF7] bg-white/95 p-4">
+                <Icon className="h-8 w-8 shrink-0 text-blue-600" />
+                <div><CountUp value={n} className={`block text-xl font-black leading-tight ${NAVY}`} /><span className="text-xs font-medium text-[#27407A]">{l}</span></div>
+              </div>
+            </AnimateOnScroll>
           ))}
         </div>
-        <p className="text-sm sm:text-base mt-5 text-blue-100">Leadership roles have included Pharmaceutical Development, Process Development &amp; Commercialization, MS&amp;T, Site Head/General Management, CMC and Global External Manufacturing, and executive advisory.</p>
       </div>
     </section>
 
-    <Section title="Executive Expertise">
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card title="CMC & Late-Stage Development" text="Translate development knowledge into a scalable, controllable, and commercially viable process." />
-        <Card title="MS&T & Technical Operations" text="Build process stewardship, technical governance, manufacturing science, and lifecycle capability." />
-        <Card title="Technology Transfer & Commercialization" text="Transfer product and process knowledge into reproducible receiving-site capability." />
-        <Card title="Manufacturing, Validation & Launch Readiness" text="Integrate PPQ, technical launch readiness, initial commercial supply, and lifecycle performance." />
-        <div className="sm:col-span-2"><Card title="Specialized Products, AI & Digital Transformation" text="Support complex oral products, sterile ophthalmics, injectables, LAIs, drug-device combination products, and apply AI and digital tools to strengthen technical decisions." /></div>
+    <Section title="Executive & Technical Expertise">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-12">
+        {EXPERTISE.map(([t, d], i) => (
+          <AnimateOnScroll key={t} type="fade-up" delay={(i % 4) * 0.06} className={i < 4 ? 'lg:col-span-3' : 'lg:col-span-4'}><TintTile tint={TINTS[i % TINTS.length]} title={t} text={d} /></AnimateOnScroll>
+        ))}
       </div>
     </Section>
 
@@ -55,30 +82,29 @@ export const OurFounderPage: React.FC<{ navigate: (r: string) => void; openConsu
         { label: 'BUILD', desc: 'Create lasting capability, not just completed activities.' },
         { label: 'DELIVER', desc: 'Turn understanding into reliable commercial supply.' },
       ]}>
-        <blockquote className="bg-white border-l-4 border-blue-500 rounded-lg p-5 sm:p-6 text-lg sm:text-xl text-[#123B5D] shadow-sm">Technical leadership is not simply about solving today&rsquo;s problem. It is about building the knowledge, systems, governance, and organizational capability required to prevent, recognize, and manage tomorrow&rsquo;s challenges.</blockquote>
+        <blockquote className="rounded-lg border-l-4 border-blue-500 bg-white p-5 text-lg text-[#0A2A7A] shadow-sm sm:p-6 sm:text-xl">Technical leadership is not simply about solving today&rsquo;s problem. It is about building the knowledge, systems, governance, and organizational capability required to prevent, recognize, and manage tomorrow&rsquo;s challenges.</blockquote>
       </LeadershipSteps>
     </Section>
 
     <Section title="Thought Leadership">
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
-        <p className="text-sm sm:text-base max-w-3xl">Raj&rsquo;s current thought leadership focuses on Enterprise Commercialization, Quality by Design, AI-assisted pharmaceutical development and technology transfer, Technical Operations, sterile ophthalmics, drug-device combination products, and executive capability building.</p>
-        <button onClick={() => navigate('/insights')} className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-5 py-2.5 rounded-md">Explore Executive Insights &amp; Publications</button>
+      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <div>
+          <p className="text-sm sm:text-base text-[#27407A]">Raj&rsquo;s current thought leadership focuses on Enterprise Commercialization, Quality by Design, AI-assisted pharmaceutical development and technology transfer, Technical Operations, sterile ophthalmics, drug-device combination products, technical due diligence and executive capability building.</p>
+          <BtnPrimary onClick={() => navigate('/insights')} className="mt-5">Explore Insights &amp; Resources</BtnPrimary>
+        </div>
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+          {THOUGHT.map(([t, im, to]) => (
+            <li key={t}>
+              <button onClick={() => navigate(to)} className="group block h-full w-full overflow-hidden rounded-lg border border-[#D7EAF7] bg-white text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
+                <img src={img(im)} alt="" loading="lazy" className="aspect-square w-full object-cover" />
+                <span className={`block p-2.5 text-[12.5px] font-extrabold leading-snug ${NAVY} group-hover:text-blue-600`}>{t}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
-      <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5 mt-7">
-        {FEATURED.map(sl => PUBLICATIONS.find(p => p.slug === sl)!).map(p => (
-          <li key={p.slug}>
-            <button onClick={() => navigate(`/insights/${p.slug}`)} className="group block w-full text-left">
-              <span className="block overflow-hidden rounded-lg border border-[#D7EAF7] bg-white shadow-sm group-hover:shadow-xl group-hover:-translate-y-1 transition-all duration-300">
-                <img src={p.cover} alt={`Cover of ${p.title}`} loading="lazy" className="w-full aspect-[3/4] object-cover object-top" />
-              </span>
-              <span className="mt-2 block text-[10px] font-extrabold uppercase tracking-wider text-emerald-600">{p.type} · {formatDate(p.date)}</span>
-              <span className="block text-[13px] font-bold text-blue-800 leading-snug group-hover:text-blue-600">{p.title}</span>
-            </button>
-          </li>
-        ))}
-      </ul>
     </Section>
 
-    <Cta title="Let's Discuss Your Commercialization Challenge" text="Whether you are advancing a product, preparing for a technology transfer, strengthening operations, or evaluating an investment opportunity, InnoTech can help." label="Get in Touch" onClick={openConsultationModal} image="about-cta" />
+    <Cta image="ab2-9" title="Let’s Discuss Your Program" text="Whether you need technical advice, CMC development support, project leadership, on-site execution, or commercialization support, InnoTech can help." label="Get in Touch" onClick={() => navigate('/contact-us')} />
   </div>
 );

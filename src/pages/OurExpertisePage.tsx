@@ -1,60 +1,65 @@
 import React, { useEffect, useState } from 'react';
-import { Hero, Cta, img } from '../components/Ui';
+import { Hero, Cta, Arrow, img, NAVY } from '../components/Ui';
 import { AnimateOnScroll } from '../components/AnimateOnScroll';
 
-const ITEMS: [string, string, string, string, string][] = [
-  ['cmc', 'CMC & Late-Stage Development', 'Translate product and process understanding into a scalable, controlled, regulatory-ready, commercially viable manufacturing strategy.', 'Focus areas include late-stage formulation and process development, QbD and control strategy, scale-up, process characterization, CMC strategy, Module 3 readiness, and development-to-commercial transition.', 'CMC & Late-Stage Development'],
-  ['mst', 'MS&T & Technical Operations', 'Build the technical stewardship required after development.', 'Our work establishes process ownership, manufacturing science, CPV, technical governance, deviation and trend understanding, lifecycle improvement, knowledge management, and cross-functional technical decision-making to ensure consistent product quality, reliable supply, and continuous improvement.', 'MS&T & Technical Operations'],
-  ['transfer', 'Technology Transfer & Manufacturing Readiness', 'Transfer product knowledge, process understanding, analytical capability, control strategy, and manufacturing experience—not just documents.', 'We assess receiving-site fit, equipment and process gaps, knowledge transfer, risk, engineering readiness, training, and execution readiness to enable successful commercial manufacturing.', 'Technology Transfer & Manufacturing Readiness'],
-  ['validation', 'Validation, Launch & Commercialization', 'Integrate validation strategy with organizational and manufacturing readiness.', 'We support PPQ readiness, process validation, technical launch readiness, initial commercial supply, risk escalation, and lifecycle transition to ensure a controlled, efficient, and successful product launch.', 'Validation, Launch & Commercialization'],
-  ['specialized', 'Specialized Products & Delivery Systems', 'Experience includes complex oral and modified-release products, sterile ophthalmic solutions, injectable and long-acting injectable programs, and drug–device combination products.', 'Our support is tailored to the actual product, process, delivery system, and manufacturing environment.', 'Specialized Products & Delivery Systems'],
-  ['ai', 'AI & Digital Technical Operations', 'Apply AI, digital twins, MES, advanced analytics, and knowledge management approaches to late-stage development, technology transfer, Technical Operations, and commercialization.', 'The objective is stronger knowledge connectivity, earlier risk visibility, better technical decisions, and more effective manufacturing insight.', 'AI & Digital Technical Operations'],
-  ['diligence', 'Technical Due Diligence & Executive Advisory', 'Evaluate product, process, manufacturing, CMC, supply, organizational, and commercialization risks in the context of business consequences.', 'We translate technical findings into business consequence, decision priorities, and action to support investment, partnering, and strategic decision-making.', 'Technical Due Diligence & Executive Advisory'],
+interface Item { id: string; chip: string; title: string; lead?: string; body: string; image: string; to: string; topic?: string }
+const ITEMS: Item[] = [
+  { id: 'cmc', chip: 'CMC & Pharmaceutical Development', title: 'CMC & Pharmaceutical Development', lead: 'Support product and process development with commercialization in mind.', body: 'Focus areas include CMC strategy, formulation development, process development, QbD, risk assessment, DoE strategy, control strategy, scale-up/scale-down, process characterization, development/manufacturing feasibility, clinical-to-commercial planning and regulatory CMC / Module 3 support.', image: 'exp-1', to: '/our-services#svc-1' },
+  { id: 'process', chip: 'Process Development, Optimization & Scale-Up', title: 'Process Development, Optimization & Scale-Up', lead: 'Translate laboratory and development knowledge toward robust manufacturing.', body: 'Support process optimization, scale-up strategy, equipment/process understanding, engineering batches, troubleshooting, process characterization and risk reduction before transfer or validation.', image: 'exp-2', to: '/our-services#svc-1' },
+  { id: 'project', chip: 'Project Leadership & Technical Execution', title: 'Project Leadership & Technical Execution', body: 'Translate technical strategy into coordinated execution across internal teams, CROs, CDMOs, manufacturing sites, Quality, Regulatory and external partners. Areas include project planning, technical workstreams, development execution, partner coordination, risk management, milestone management, technical decisions and issue resolution.', image: 'exp-3', to: '/our-services#svc-2' },
+  { id: 'mst', chip: 'MS&T & Technical Operations', title: 'MS&T & Technical Operations', body: 'Build and support technical stewardship after development: process ownership, manufacturing science, CPV, technical governance, deviation/trend understanding, lifecycle improvement, knowledge management and cross-functional technical decision-making.', image: 'exp-4', to: '/our-services#svc-5' },
+  { id: 'transfer', chip: 'Technology Transfer & Manufacturing Readiness', title: 'Technology Transfer & Manufacturing Readiness', body: 'Transfer product knowledge, process understanding, analytical capability, control strategy and manufacturing experience—not just documents. Assess receiving-site fit, equipment/process gaps, knowledge transfer, risk, engineering readiness, training and execution readiness.', image: 'exp-5', to: '/our-services#svc-4' },
+  { id: 'validation', chip: 'Validation, Launch & Lifecycle Management', title: 'Validation, Launch & Lifecycle Management', lead: 'Integrate validation strategy with manufacturing and organizational readiness.', body: 'Support PPQ readiness, process validation, technical launch, initial commercial supply, post-approval change, CPV, process improvement and lifecycle transition.', image: 'exp-6', to: '/our-services#svc-6' },
+  { id: 'specialized', chip: 'Specialized Products & Delivery Systems', title: 'Specialized Products & Delivery Systems', body: 'Experience includes complex oral and modified-release products, sterile ophthalmic solutions, injectable/long-acting injectable programs and drug-device combination products. Support is tailored to the actual product, process, delivery system and manufacturing environment.', image: 'exp-7', to: '/our-services#svc-7' },
+  { id: 'ai', chip: 'AI, Digital & Technical Due Diligence', title: 'AI, Digital & Technical Due Diligence', body: 'Apply AI, digital twins, MES, analytics and knowledge-management approaches to pharmaceutical workflows; and evaluate product, process, manufacturing, CMC, supply and commercialization risks for business decisions.', image: 'exp-8', to: '/insights', topic: 'AI, Digital Twins & Manufacturing Intelligence' },
 ];
-const SHORT = ['CMC & Late-Stage Development', 'MS&T & Technical Operations', 'Technology Transfer & Manufacturing Readiness', 'Validation, Launch & Commercialization', 'Specialized Products & Delivery Systems', 'AI & Digital Technical Operations', 'Technical Due Diligence & Executive Advisory'];
+const CHIP_TINTS = ['bg-[#E6F0FF]', 'bg-[#E4F8EC]', 'bg-[#EEE9FF]', 'bg-[#FFF4DC]', 'bg-[#E3F1FB]', 'bg-[#E4F8EC]', 'bg-[#FFE9EC]', 'bg-[#E8F0FF]'];
 
-export const OurExpertisePage: React.FC<{ navigate: (r: string) => void; openConsultationModal: () => void }> = ({ openConsultationModal }) => {
-  const [active, setActive] = useState(ITEMS[0][0]);
+export const OurExpertisePage: React.FC<{ navigate: (r: string) => void; openConsultationModal: () => void }> = ({ navigate }) => {
+  const [active, setActive] = useState(ITEMS[0].id);
   useEffect(() => {
     if (typeof IntersectionObserver === 'undefined') return;
-    const io = new IntersectionObserver(es => { es.forEach(e => e.isIntersecting && setActive(e.target.id)); }, { rootMargin: '-30% 0px -60% 0px' });
-    ITEMS.forEach(([id]) => { const el = document.getElementById(id); if (el) io.observe(el); });
+    const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && setActive(e.target.id)), { rootMargin: '-30% 0px -60% 0px' });
+    ITEMS.forEach(i => { const el = document.getElementById(i.id); if (el) io.observe(el); });
     return () => io.disconnect();
   }, []);
   const go = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const learn = (it: Item) => { if (it.topic) { try { sessionStorage.setItem('insights-topic', it.topic); } catch { /* ignore */ } } navigate(it.to); };
 
   return (
-    <div className="font-sans text-[#536B7D] bg-white">
-      <Hero title="Expertise" accent="From Development Knowledge to Commercial Capability" image="exp-hero" imageAlt="Technician beside a pharmaceutical filling line">
-        <p>InnoTech connects scientific understanding with the technical, manufacturing, organizational, and digital capabilities required to move products from late-stage development into reliable commercial supply.</p>
+    <div className="font-sans bg-white">
+      <Hero image="exp-0" imageAlt="Technician beside a pharmaceutical filling line" title="Expertise" sub="From Pharmaceutical Development to Lifecycle Excellence">
+        <p>InnoTech connects scientific understanding with the technical, manufacturing, organizational and digital capabilities required to move products from development into reliable commercial supply and sustained lifecycle performance.</p>
       </Hero>
 
-      <nav aria-label="Expertise areas" className="sticky top-[61px] sm:top-[69px] z-30 bg-white/95 backdrop-blur border-b border-[#D7EAF7]">
-        <ul className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex gap-2 overflow-x-auto no-scrollbar">
-          {ITEMS.map(([id], i) => (
-            <li key={id} className="shrink-0">
-              <button onClick={() => go(id)} aria-current={active === id} className={`rounded-md px-3 py-2 text-xs font-bold transition-colors ${active === id ? 'bg-blue-600 text-white' : 'bg-[#EAF6FD] text-[#123B5D] hover:bg-blue-100'}`}>{SHORT[i]}</button>
+      <nav aria-label="Expertise areas" className="sticky top-[61px] z-30 border-b border-[#D7EAF7] bg-white/95 backdrop-blur sm:top-[69px]">
+        <ul className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-2.5 no-scrollbar sm:px-6 lg:grid lg:grid-cols-8 lg:px-8">
+          {ITEMS.map((it, i) => (
+            <li key={it.id} className="shrink-0 lg:shrink">
+              <button onClick={() => go(it.id)} aria-current={active === it.id} className={`h-full w-full rounded-lg px-3 py-2.5 text-center text-[11.5px] font-bold leading-tight transition-all ${active === it.id ? 'bg-[#0A2A8F] text-white shadow' : `${CHIP_TINTS[i]} ${NAVY} hover:-translate-y-0.5`}`}>{it.chip}</button>
             </li>
           ))}
         </ul>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-5">
-        {ITEMS.map(([id, t, lead, body], i) => (
-          <AnimateOnScroll key={id} type="fade-up">
-            <section id={id} className="scroll-mt-36 border border-[#D7EAF7] rounded-xl p-5 sm:p-6 grid md:grid-cols-[1fr_360px] gap-6 items-center hover:shadow-md transition-shadow">
-              <div className={i % 2 ? 'md:order-2' : ''}>
-                <span className="text-xs font-black text-emerald-600">0{i + 1}</span>
-                <h2 className="text-xl sm:text-2xl font-black text-blue-700">{t}</h2>
-                <p className="mt-2 font-semibold text-[#123B5D] text-sm sm:text-base">{lead}</p>
-                <p className="mt-2 text-sm sm:text-base">{body}</p>
+      <div className="mx-auto max-w-7xl space-y-3 px-4 py-8 sm:px-6 lg:px-8">
+        {ITEMS.map(it => (
+          <AnimateOnScroll key={it.id} type="fade-up">
+            <section id={it.id} className="grid scroll-mt-36 items-center gap-5 border-b border-[#D7EAF7] py-6 md:grid-cols-[minmax(0,1fr)_minmax(0,0.62fr)] md:gap-8">
+              <div>
+                <span className="mb-2 block h-0.5 w-10 bg-emerald-500" />
+                <h2 className={`text-xl font-black leading-tight sm:text-2xl ${NAVY}`}>{it.title}</h2>
+                {it.lead && <p className={`mt-2 text-sm font-semibold sm:text-base ${NAVY}`}>{it.lead}</p>}
+                <p className="mt-2 text-sm leading-relaxed text-[#27407A] sm:text-base">{it.body}</p>
+                <button onClick={() => learn(it)} className={`group mt-3 inline-flex items-center gap-1.5 text-sm font-extrabold ${NAVY} hover:text-blue-600`}>Learn More <Arrow className="transition-transform group-hover:translate-x-1" /></button>
               </div>
-              <img src={img(`exp-${i + 1}`)} alt={t} loading="lazy" className={`rounded-lg w-full h-44 object-cover ${i % 2 ? 'md:order-1' : ''}`} />
+              <img src={img(it.image)} alt={it.title} loading="lazy" className="h-48 w-full rounded-xl object-cover shadow-sm sm:h-56" />
             </section>
           </AnimateOnScroll>
         ))}
       </div>
-      <Cta title="Let's Build Commercialization Success Together" text="Whether you are advancing a product, preparing for a technology transfer, strengthening Technical Operations, addressing a manufacturing challenge, or evaluating an investment opportunity, InnoTech can help." label="Discuss Your Commercialization Challenge" onClick={openConsultationModal} image="who-cta" />
+
+      <Cta image="exp-9" title={<>Let’s Build Your <span className="text-cyan-300">Commercialization Capability</span></>} text="Whether you need technical advice, CMC development support, project leadership, on-site execution, or commercialization support, InnoTech can help." label="Get in Touch" onClick={() => navigate('/contact-us')} />
     </div>
   );
 };

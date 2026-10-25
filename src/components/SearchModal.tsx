@@ -1,33 +1,34 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Search, X, FileText, LayoutGrid } from 'lucide-react';
-import { PUBLICATIONS } from '../data/publications';
+import { RESOURCES } from '../data/publications';
 
 interface Props { isOpen: boolean; onClose: () => void; navigate: (route: string) => void }
 interface Item { title: string; desc: string; route: string; kind: 'Page' | 'Service' | 'Publication'; keys: string }
 
 const PAGES: Item[] = [
-  { title: 'Home', desc: 'Commercialization advisory overview', route: '/', kind: 'Page', keys: 'home overview start' },
-  { title: 'About InnoTech', desc: 'Philosophy, how we work and our commitment', route: '/about-us', kind: 'Page', keys: 'about philosophy commitment how we work' },
-  { title: 'Raj Thota, Founder', desc: 'Career, executive expertise and thought leadership', route: '/our-founder', kind: 'Page', keys: 'founder raj thota leadership career fda approvals' },
-  { title: 'Who We Work With', desc: 'Organizations we support and how we partner', route: '/our-partners', kind: 'Page', keys: 'clients organizations partner cdmo investors startups engage' },
-  { title: 'Expertise', desc: 'CMC, MS&T, tech transfer, validation, specialized products, AI, due diligence', route: '/our-expertise', kind: 'Page', keys: 'expertise cmc late stage ms&t technical operations transfer validation specialized ai due diligence' },
-  { title: 'Services', desc: 'Seven advisory services and engagement models', route: '/our-services', kind: 'Page', keys: 'services assessment readiness technology transfer ppq launch lai ophthalmic ai digital recovery engagement' },
-  { title: 'Frameworks & Executive Tools', desc: 'Enterprise framework, library, readiness scale, AI frameworks', route: '/frameworks', kind: 'Page', keys: 'framework library readiness scale scorecard roadmap inspection governance ai frameworks' },
-  { title: 'Executive Insights', desc: 'White papers, blogs and learning series', route: '/insights', kind: 'Page', keys: 'insights publications white paper blog resources learning series qbd' },
+  { title: 'Home', desc: 'End-to-end development, CMC and commercialization support', route: '/', kind: 'Page', keys: 'home overview lifecycle advise develop execute support on-site' },
+  { title: 'About InnoTech', desc: 'Philosophy, strategy and execution, how we work, our commitment', route: '/about-us', kind: 'Page', keys: 'about philosophy commitment how we work strategy execution' },
+  { title: 'Raj Thota, Founder', desc: 'Career, executive and technical expertise, thought leadership', route: '/our-founder', kind: 'Page', keys: 'founder raj thota leadership career fda approvals' },
+  { title: 'Who We Work With', desc: 'Emerging biotech, virtual companies, CDMOs, investors and more', route: '/our-partners', kind: 'Page', keys: 'clients organizations partner cdmo investors startups biotech engage how we partner' },
+  { title: 'Expertise', desc: 'CMC, process development, project leadership, MS&T, transfer, validation, specialized products, AI', route: '/our-expertise', kind: 'Page', keys: 'expertise cmc scale-up project leadership ms&t technology transfer validation specialized ai due diligence' },
+  { title: 'Services', desc: 'Eight support services and flexible engagement models', route: '/our-services', kind: 'Page', keys: 'services cmc project leadership on-site transfer ppq launch lai ophthalmic lifecycle engagement models' },
+  { title: 'Insights & Resources', desc: 'White papers, executive guides, playbooks, articles and perspectives', route: '/insights', kind: 'Page', keys: 'insights resources publications white paper guide playbook blog learning series articles' },
+  { title: 'Frameworks & Executive Tools', desc: 'Enterprise commercialization framework, framework library, readiness scale', route: '/frameworks', kind: 'Page', keys: 'framework library readiness scale scorecard roadmap inspection governance ai frameworks' },
   { title: 'Contact', desc: 'Request an initial discussion', route: '/contact-us', kind: 'Page', keys: 'contact email phone address discussion form quote' },
   { title: 'Privacy Policy', desc: 'How information is handled', route: '/privacy-policy', kind: 'Page', keys: 'privacy data policy' },
   { title: 'Terms & Conditions', desc: 'Website terms of use', route: '/terms-and-conditions', kind: 'Page', keys: 'terms conditions legal' },
 ];
 const SERVICES: Item[] = [
-  ['Commercialization Readiness Assessments', 'CMC, tech transfer, manufacturing, PPQ and launch readiness reviews'],
-  ['Technology Transfer & Commercialization Execution', 'Sending-site to receiving-site capability'],
-  ['MS&T & Technical Operations Transformation', 'Process stewardship, CPV and technical governance'],
-  ['Validation, PPQ & Technical Launch', 'From process understanding to initial commercial supply'],
-  ['Specialized Products & Delivery Systems', 'Oral, ophthalmic, injectable, LAI and combination products'],
-  ['AI & Digital Transformation', 'AI-assisted QbD, digital twins, MES and Good AI Practice'],
-  ['Executive Advisory, Due Diligence & Recovery', 'Independent clarity for leaders, boards and investors'],
-].map(([title, desc]) => ({ title, desc, route: '/our-services', kind: 'Service' as const, keys: title + ' ' + desc }));
-const PUBS: Item[] = PUBLICATIONS.map(p => ({ title: p.title, desc: `${p.type} · ${p.summary}`, route: `/insights/${p.slug}`, kind: 'Publication' as const, keys: p.topics.join(' ') + ' ' + p.takeaways.join(' ') }));
+  ['CMC Development & Product Development Support', 'Phase-appropriate CMC path, formulation, QbD/DoE, Module 3', '/our-services#svc-1'],
+  ['Project Leadership & Project Execution', 'Technical program leadership, CRO/CDMO coordination, milestones', '/our-services#svc-2'],
+  ['On-Site Technical & Manufacturing Support', 'Hands-on support at client, CDMO or manufacturing sites', '/our-services#svc-3'],
+  ['Technology Transfer & Manufacturing Readiness', 'Sending-site to receiving-site capability', '/our-services#svc-4'],
+  ['MS&T & Technical Operations Support', 'Process stewardship, CPV and technical governance', '/our-services#svc-5'],
+  ['Validation, PPQ & Commercial Launch', 'From process understanding to initial commercial supply', '/our-services#svc-6'],
+  ['Specialized Product Development & Commercialization', 'Oral, ophthalmic, injectable, LAI and combination products', '/our-services#svc-7'],
+  ['Lifecycle Management & Post-Approval Support', 'CPV, post-approval change, supply continuity', '/our-services#svc-8'],
+].map(([title, desc, route]) => ({ title, desc, route, kind: 'Service' as const, keys: title + ' ' + desc }));
+const PUBS: Item[] = RESOURCES.map(r => ({ title: r.title, desc: `${r.kind} · ${r.summary}`, route: `/insights/${r.slug}`, kind: 'Publication' as const, keys: r.topics.join(' ') + ' ' + r.takeaways.join(' ') }));
 const INDEX = [...PAGES, ...SERVICES, ...PUBS];
 const QUICK = ['technology transfer', 'PPQ', 'framework', 'LAI', 'solubility', 'CDMO'];
 

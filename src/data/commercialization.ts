@@ -1,4 +1,4 @@
-// Content source for the commercialization-advisory positioning (per client mockups, Web_site_Model_V1)
+// Content for the Frameworks & Executive Tools page
 export const FRAMEWORK_STAGES = [
   { detail: 'Build deep product and process understanding — quality attributes, control strategy and risk — before scale-up decisions are made.', stage: 'UNDERSTAND', area: 'Development', color: '#0B3C8C' },
   { detail: 'Translate development knowledge into a scalable, controlled and regulatory-ready CMC package.', stage: 'BUILD', area: 'CMC', color: '#1E88E5' },
@@ -9,35 +9,6 @@ export const FRAMEWORK_STAGES = [
   { detail: 'Secure materials, capacity and inventory for reliable commercial supply.', stage: 'SUPPLY', area: 'Supply Chain', color: '#6A3FB5' },
   { detail: 'Maintain performance through CPV, knowledge updates and lifecycle improvement.', stage: 'SUSTAIN', area: 'Commercial', color: '#3B2A8C' },
 ];
-
-export const PATHWAY = ['Scientific Understanding', 'Process Capability', 'Technology Transfer', 'Manufacturing Readiness', 'Validation', 'Launch', 'Reliable Supply'];
-
-export const VALUE_AREAS = [
-  { title: 'CMC & Late-Stage Development', text: 'Translate development knowledge into a scalable, controlled, commercially viable process.', to: '/our-expertise' },
-  { title: 'MS&T & Technical Operations', text: 'Build process stewardship, technical governance, manufacturing science, and lifecycle capability.', to: '/our-expertise' },
-  { title: 'Technology Transfer & Manufacturing Readiness', text: 'Transfer product and process knowledge into reproducible receiving-site capability.', to: '/our-expertise' },
-  { title: 'Validation, Launch & Commercialization', text: 'Integrate PPQ, technical launch readiness, initial commercial supply, and lifecycle performance.', to: '/our-expertise' },
-  { title: 'Specialized Products & Delivery Systems', text: 'Support complex oral products, sterile ophthalmics, injectables, LAIs, and drug-device combination products.', to: '/our-expertise' },
-  { title: 'AI & Digital Technical Operations', text: 'Apply AI, digital twins, MES, advanced analytics, and knowledge systems to strengthen technical decisions and manufacturing performance.', to: '/our-expertise' },
-];
-
-export const DIFFERENCE = [
-  ['Commercialization Begins Before PPQ', 'Readiness should be designed into late-stage development, not discovered at validation.'],
-  ['Technology Transfer Is Knowledge Transfer', 'Documents explain what to do. Process understanding explains why.'],
-  ['Readiness Is Evidence-Based', 'Calendar progress does not equal manufacturing readiness.'],
-  ['Risk Should Be Visible Early', 'Earlier visibility creates more technical and business options.'],
-  ['Digital Technology Must Serve the Process', 'AI and digital tools should strengthen pharmaceutical decisions—not replace accountable experts.'],
-  ['Commercialization Is an Enterprise Capability', 'Reliable supply requires cross-functional alignment, not isolated functional success.'],
-];
-
-export const FOUNDER_STATS = [
-  ['150+', 'Commercialized Products Supported'],
-  ['41', 'FDA Product Approvals'],
-  ['$5B+', 'Technical M&A Due Diligence'],
-  ['Global', 'Manufacturing & CDMO Leadership'],
-  ['Nearly Three Decades', 'Development-to-Commercial Lifecycle Experience'],
-];
-
 
 export const FRAMEWORK_LIBRARY = [
   ['Commercialization Planning Framework', 'Build one integrated commercialization plan linking technical milestones, manufacturing capability, regulatory needs, supply dependencies, business decisions, and launch readiness.'],
@@ -64,21 +35,3 @@ export const DECISION_OUTCOMES = ['Advance', 'Advance With Conditions', 'Hold', 
 export const AI_FRAMEWORKS = ['AI-Assisted QbD', 'AI-Assisted Technology Transfer', 'Good AI Practice in Pharma & Biotech', 'Digital Twin Value Framework', 'MES & Connected Technical Operations', 'Technical Knowledge Management', 'AI-Enabled Technical Operations Maturity'];
 
 export const ACTION_FLOW = ['Explore', 'Assess', 'Score', 'Prioritize', 'Align', 'Act', 'Verify', 'Sustain'];
-
-export const PRIMARY_AREAS = ['CMC & Late-Stage Development', 'MS&T & Technical Operations', 'Technology Transfer', 'Manufacturing Readiness', 'Validation / PPQ / Launch', 'Specialized Products', 'AI & Digital Transformation', 'Technical Due Diligence', 'Other'];
-
-export const WHAT_GAPS = ['Development', 'CMC', 'MS&T', 'Engineering', 'Manufacturing', 'Quality', 'Regulatory', 'Supply Chain', 'Commercial'];
-export const ONE_LINES = [
-  ['One product strategy', 'Development, CMC and regulatory plans pulling in the same direction.'],
-  ['One manufacturing strategy', 'Sites, equipment and people planned around the process.'],
-  ['One integrated risk picture', 'Cross-functional risks visible early, owned and prioritized.'],
-  ['One path to reliable commercial supply', 'From first understanding to sustained performance.'],
-];
-export const CAREER = [
-  { label: 'DEVELOPMENT', note: 'Pharmaceutical Development' },
-  { label: 'CMC', note: 'CMC & Global External Manufacturing' },
-  { label: 'MS&T', note: 'Process stewardship' },
-  { label: 'TECHNICAL OPERATIONS', note: 'Process Development & Commercialization' },
-  { label: 'MANUFACTURING LEADERSHIP', note: 'Site Head / General Management' },
-  { label: 'ENTERPRISE COMMERCIALIZATION', note: 'Executive advisory' },
-];

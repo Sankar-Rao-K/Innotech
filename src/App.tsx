@@ -38,10 +38,13 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  // Routes may carry an in-page anchor, for example '/our-services#svc-4'
   const navigate = (route: string) => {
-    window.history.pushState({}, '', route);
-    setCurrentRoute(normalize(route));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const [path, hash] = route.split('#');
+    window.history.pushState({}, '', path || '/');
+    setCurrentRoute(normalize(path || '/'));
+    window.scrollTo({ top: 0, behavior: hash ? 'auto' : 'smooth' });
+    if (hash) setTimeout(() => document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 450);
   };
 
 
@@ -54,17 +57,17 @@ export default function App() {
   useEffect(() => {
     const base = 'InnoTech BioPharm Solutions';
     const titles: Record<string, string> = {
-      '/': `${base} | Pharmaceutical & Biotechnology Commercialization Advisory`,
+      '/': `${base} | End-to-End Pharmaceutical Development, CMC & Commercialization Support`,
       '/about-us': `About | ${base}`, '/who-we-are': `About | ${base}`, '/our-founder': `Raj Thota, Founder | ${base}`,
       '/our-partners': `Who We Work With | ${base}`, '/who-we-work-with': `Who We Work With | ${base}`,
       '/our-expertise': `Expertise | ${base}`, '/expertise': `Expertise | ${base}`, '/our-services': `Services | ${base}`, '/services': `Services | ${base}`,
       '/frameworks': `Frameworks & Executive Tools | ${base}`, '/our-capabilities': `Frameworks & Executive Tools | ${base}`,
-      '/insights': `Executive Insights | ${base}`, '/blogs': `Executive Insights | ${base}`,
+      '/insights': `Insights & Resources | ${base}`, '/blogs': `Insights & Resources | ${base}`,
       '/contact-us': `Contact | ${base}`, '/contact': `Contact | ${base}`,
       '/privacy-policy': `Privacy Policy | ${base}`, '/privacy': `Privacy Policy | ${base}`,
       '/terms-and-conditions': `Terms & Conditions | ${base}`, '/terms': `Terms & Conditions | ${base}`,
     };
-    document.title = titles[currentRoute] || (/^\/(insights|blogs)\//.test(currentRoute) ? `Publication | ${base}` : `Page not found | ${base}`);
+    document.title = titles[currentRoute] || (/^\/(insights|blogs)\//.test(currentRoute) ? `Resource | ${base}` : `Page not found | ${base}`);
   }, [currentRoute]);
 
   // Render current view according to route
@@ -85,7 +88,7 @@ export default function App() {
       return <OurExpertisePage navigate={navigate} openConsultationModal={() => setConsultationModalOpen(true)} />;
     }
     if (currentRoute === '/frameworks' || currentRoute === '/our-capabilities') {
-      return <FrameworksPage openConsultationModal={() => setConsultationModalOpen(true)} />;
+      return <FrameworksPage navigate={navigate} openConsultationModal={() => setConsultationModalOpen(true)} />;
     }
     if (currentRoute === '/our-partners' || currentRoute === '/who-we-work-with') {
       return <OurPartnersPage navigate={navigate} openConsultationModal={() => setConsultationModalOpen(true)} />;
@@ -129,7 +132,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 font-sans selection:bg-cyan-500 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-white font-sans selection:bg-cyan-500 selection:text-white">
       {/* Navigation Header */}
       <Header
         currentRoute={currentRoute}
@@ -144,7 +147,7 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <Footer navigate={navigate} showToast={showToast} />
+      <Footer navigate={navigate} />
 
       {/* Floating Native Customer Care Chatbot */}
       <Chatbot

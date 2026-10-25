@@ -1,77 +1,119 @@
 import React from 'react';
-import { Hero, Section, Card, Cta, img } from '../components/Ui';
-import { RelayFlow, StepBars, CountUp } from '../components/Flows';
-import { FOUNDER_STATS } from '../data/commercialization';
+import { Atom, Factory, Settings, TrendingUp } from 'lucide-react';
+import { Hero, Section, SectionHead, TintTile, TINTS, BtnPrimary, BtnOutline, Cta, img, NAVY } from '../components/Ui';
+import { AnimateOnScroll } from '../components/AnimateOnScroll';
+import { PinFlow, DashConnect, CountUp } from '../components/Flows';
+
+const PHILOSOPHY = [
+  { label: 'SCIENCE', caption: 'Scientific Understanding', color: '#0B5FD8' },
+  { label: 'PROCESS', caption: 'Process Development', color: '#0A9EE8' },
+  { label: 'CAPABILITY', caption: 'Technical Capability', color: '#16A34A' },
+  { label: 'READINESS', caption: 'Manufacturing Readiness', color: '#F5A300' },
+  { label: 'SUPPLY', caption: 'Reliable Supply', color: '#F2622A' },
+  { label: 'LIFECYCLE', caption: 'Lifecycle Management', color: '#7C3AED' },
+];
+const STEPS: [string, string, string][] = [
+  ['ASSESS', 'Understand the product, process, program, evidence, risks and next milestones.', 'ab1-4'],
+  ['ALIGN', 'Establish priorities, responsibilities, decisions and an integrated path forward.', 'ab1-5'],
+  ['BUILD', 'Develop the technical strategy, knowledge, plan, controls and capability required.', 'ab1-6'],
+  ['EXECUTE', 'Lead or support development, transfer, manufacturing validation, launch or remediation activities.', 'ab1-8'],
+  ['SUSTAIN', 'Strengthen technical stewardship, lifecycle performance, knowledge management and organizational capability.', 'ab1-9'],
+];
+const STATS: [string, string][] = [['150+', 'Commercialized Products Supported'], ['41', 'FDA Product Approvals'], ['$5B+', 'Technical M&A Due Diligence'], ['Global', 'Manufacturing & CDMO Networks']];
 
 export const WhoWeArePage: React.FC<{ navigate: (r: string) => void; openConsultationModal: () => void }> = ({ navigate, openConsultationModal }) => (
-  <div className="font-sans text-[#536B7D] bg-white">
+  <div className="font-sans bg-white">
     <Hero
-      eyebrow="ABOUT INNOTECH BIOPHARM SOLUTIONS"
-      title={<>Bridging Development and Commercial <span className="text-cyan-300">Manufacturing</span></>}
-      aside={
-        <div className="relative pb-8">
-          <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-cyan-400/30 to-blue-500/10 blur-xl" aria-hidden="true" />
-          <img src={img('about-vial')} alt="Scientist inspecting a pharmaceutical vial" className="relative w-full aspect-[16/10] object-cover rounded-2xl border border-white/20 shadow-2xl" />
-          <img src={img('exp-2')} alt="Technician at a manufacturing control panel" className="absolute -bottom-0 -left-2 sm:-left-6 w-2/5 aspect-[16/10] object-cover rounded-xl border-4 border-[#0B2A5B] shadow-xl" />
-          <span className="absolute bottom-0 right-3 rounded-full bg-emerald-500 px-4 py-1.5 text-xs font-extrabold shadow-lg">Development → Reliable Supply</span>
-        </div>
-      }
+      eyebrow="ABOUT INNOTECH BIOPHARM SOLUTIONS" image="ab1-1" imageAlt="Scientist reviewing a tablet beside a vial filling line"
+      title={<>Connecting Pharmaceutical Development with <span className="text-[#1769E0]">Commercial Manufacturing</span></>}
+      actions={<><BtnPrimary onClick={() => navigate('/our-founder')}>Our Story</BtnPrimary><BtnOutline onClick={openConsultationModal}>Discuss Your Program</BtnOutline></>}
     >
-      <p>InnoTech BioPharm Solutions is an executive advisory firm helping pharmaceutical and biotechnology organizations transform scientific knowledge into manufacturing capability, commercialization readiness, and reliable product supply.</p>
-      <p>A product is not truly commercialized when development is complete. It is commercialized when the organization can manufacture and supply it reliably.</p>
-      <button onClick={() => navigate('/our-founder')} className="mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-6 py-3 rounded-md">Our Story</button>
+      <p>InnoTech BioPharm Solutions is a pharmaceutical development, CMC, Technical Operations and commercialization consulting organization supporting programs from development through commercial manufacturing and lifecycle management.</p>
+      <p>We work with clients at the level their program requires—from strategic CMC guidance and independent technical assessment to project leadership, technical execution, technology transfer, manufacturing site support, validation, launch and lifecycle problem-solving.</p>
     </Hero>
 
-    <Section title="Our Commercialization Philosophy" sub="Commercialization is the point where science, manufacturing, quality, regulatory strategy, supply, and business execution must work as one system.">
-      <div className="grid lg:grid-cols-2 gap-8 items-center mb-10">
-        <p className="text-sm sm:text-base">Our focus is not simply completing activities. It is building the technical and organizational capability required to reproduce the process, manage risk, make sound decisions, and sustain reliable commercial supply.</p>
-        <img src={img('svc-1')} alt="Cross-functional team reviewing manufacturing analytics" loading="lazy" className="rounded-2xl w-full aspect-[16/8] object-cover shadow" />
+    <section className="bg-white py-10 sm:py-14">
+      <div className="mx-auto grid max-w-7xl items-start gap-8 px-4 sm:px-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-12 lg:px-8">
+        <AnimateOnScroll type="slide-right">
+          <SectionHead title="Our Philosophy" sub="Scientific Success Must Become Reproducible Capability" />
+          <p className="mt-4 text-sm sm:text-base text-[#27407A]">Development, CMC, manufacturing, Quality, Regulatory, supply and business execution must ultimately work as one system.</p>
+          <p className="mt-3 text-sm sm:text-base text-[#27407A]">Our focus is not simply completing activities. It is building the product knowledge, process understanding, technical decisions and organizational capability required to move the program forward and sustain reliable supply.</p>
+        </AnimateOnScroll>
+        <div className="lg:pt-2"><PinFlow items={PHILOSOPHY} /></div>
       </div>
-      <RelayFlow items={['Science', 'Capability', 'Readiness', 'Supply', 'Lifecycle']} />
-    </Section>
+    </section>
 
-    <Section tint title="How We Work" sub="Independent Perspective. Integrated Strategy. Practical Execution. Sustainable Capability.">
-      <StepBars>
-        {[
-          <Card key="a" image="how-assess" title="ASSESS" text="Understand the product, process, organization, evidence, dependencies, and risk." />,
-          <Card key="b" image="how-align" title="ALIGN" text="Create one cross-functional view of priorities, decisions, ownership, and milestones." />,
-          <Card key="c" image="how-build" title="BUILD" text="Strengthen process understanding, manufacturing capability, governance, and readiness." />,
-          <Card key="d" image="how-execute" title="EXECUTE" text="Support technology transfer, validation, launch, recovery, or transformation." />,
-          <Card key="e" image="how-sustain" title="SUSTAIN" text="Embed knowledge, process stewardship, monitoring, and organizational capability." />,
-        ]}
-      </StepBars>
-    </Section>
-
-    <Section title="Our Commitment">
-      <div className="grid md:grid-cols-3 gap-4">
-        <Card title="SCIENTIFIC RIGOR" text="Decisions grounded in product and process understanding." />
-        <Card title="MANUFACTURING REALITY" text="Strategies designed for actual equipment, sites, people, systems, and supply constraints." />
-        <Card title="COMMERCIAL PERSPECTIVE" text="Technical decisions evaluated in the context of timing, risk, cost, launch, and lifecycle performance." />
-      </div>
-    </Section>
-
-    <Section tint title="Leadership Grounded in the Commercialization Lifecycle">
-      <div className="grid md:grid-cols-[240px_1fr] gap-8 items-start">
-        <img src={img('founder')} alt="Raj Thota, Founder & Principal Advisor" loading="lazy" className="rounded-xl w-full max-w-[240px] mx-auto md:mx-0 object-cover shadow" />
-        <div>
-          <h3 className="text-2xl font-black text-[#123B5D]">Raj Thota</h3>
-          <p className="font-semibold text-[#123B5D]">Founder &amp; Principal Advisor</p>
-          <p className="text-sm sm:text-base mt-3">Raj Thota brings over three decades of experience across Pharmaceutical Development, CMC, MS&amp;T, Technical Operations, global manufacturing, technology transfer, validation, site leadership, commercialization, and executive advisory.</p>
-          <p className="text-sm sm:text-base mt-3">He has supported 150+ commercialized products, 41 FDA product approvals, global manufacturing and CDMO networks, and $5B+ in technical M&amp;A due diligence, helping organizations solve complex challenges and create lasting value.</p>
-          <button onClick={() => navigate('/our-founder')} className="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-5 py-2.5 rounded-md">Meet the Founder</button>
+    <section className="bg-[#F4F9FE] py-10 sm:py-14">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h2 className={`text-2xl sm:text-3xl font-black leading-tight ${NAVY}`}>Strategy When Strategy Is Needed. Execution When Execution Is Needed.</h2>
+        <p className="mt-3 max-w-4xl text-sm sm:text-base text-[#27407A]">Some programs need an independent technical perspective. Others need experienced leadership to build the plan, coordinate partners, solve technical problems and execute critical milestones. InnoTech supports both—connecting strategy with practical implementation.</p>
+        <div className="mt-7 grid items-stretch gap-4 lg:grid-cols-[1fr_auto_1fr]">
+          <AnimateOnScroll type="slide-right" className="h-full">
+            <div className="grid h-full overflow-hidden rounded-xl border border-emerald-200 bg-[#EAF8EF] sm:grid-cols-[1fr_200px]">
+              <div className="p-5"><h3 className="text-xl font-black text-emerald-700">STRATEGY</h3><p className={`font-extrabold ${NAVY}`}>Independent Technical Perspective</p>
+                <ul className="mt-3 space-y-1.5 text-sm text-[#27407A]">{['CMC strategy and development planning', 'Independent assessments and due diligence', 'Risk identification and mitigation', 'Project and portfolio guidance'].map(i => <li key={i} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />{i}</li>)}</ul></div>
+              <img src={img('ab1-1a')} alt="" loading="lazy" className="hidden h-full w-full object-cover sm:block" />
+            </div>
+          </AnimateOnScroll>
+          <div className="flex items-center justify-center" aria-hidden="true"><span className="anim-pulse-ring flex h-10 w-10 rotate-90 items-center justify-center rounded-full bg-[#0A2A8F] text-white lg:rotate-0">›</span></div>
+          <AnimateOnScroll type="slide-left" className="h-full">
+            <div className="grid h-full overflow-hidden rounded-xl border border-blue-200 bg-[#E8F2FF] sm:grid-cols-[1fr_200px]">
+              <div className="p-5"><h3 className="text-xl font-black text-[#0A5BD6]">EXECUTION</h3><p className={`font-extrabold ${NAVY}`}>Experienced Leadership and Hands-On Support</p>
+                <ul className="mt-3 space-y-1.5 text-sm text-[#27407A]">{['Program and project leadership', 'Technical execution and problem-solving', 'Technology transfer and site support', 'Validation, PPQ and launch readiness', 'Lifecycle management and continuous improvement'].map(i => <li key={i} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />{i}</li>)}</ul></div>
+              <img src={img('ab1-3')} alt="" loading="lazy" className="hidden h-full w-full object-cover sm:block" />
+            </div>
+          </AnimateOnScroll>
         </div>
       </div>
-      <h3 className="mt-10 mb-3 font-bold text-[#123B5D]">Selected Career Experience of InnoTech Founder Raj Thota</h3>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        {FOUNDER_STATS.map(([n, l], i) => (
-          <div key={n} className={`bg-emerald-100 text-[#123B5D] rounded-md text-center py-4 px-2 ${i === 4 ? 'col-span-2 md:col-span-1' : ''}`}>
-            <CountUp value={n} className="block text-2xl font-black" /><div className="text-xs font-semibold">{l}</div>
+    </section>
+
+    <Section title="How We Work">
+      <DashConnect compact>
+        {STEPS.map(([t, d, im], i) => (
+          <div key={t} className="h-full overflow-hidden rounded-xl border border-[#D7EAF7] bg-white shadow-sm">
+            <img src={img(im)} alt="" loading="lazy" className="h-28 w-full object-cover" />
+            <div className="p-3.5"><h3 className={`flex items-center gap-2 text-sm font-extrabold ${NAVY}`}><span className="text-xl font-black text-blue-600">{i + 1}</span>{t}</h3><p className="mt-1.5 text-[13px] leading-relaxed text-[#27407A]">{d}</p></div>
           </div>
         ))}
-      </div>
-      <p className="text-sm mt-4">Experience spans Pharmaceutical Development, CMC, MS&amp;T, Technical Operations, technology transfer, validation, manufacturing/site leadership, external manufacturing, commercialization, and executive advisory.</p>
+      </DashConnect>
     </Section>
 
-    <Cta title="Let's Discuss Your Commercialization Challenge" text="Whether you are advancing a product, preparing for a technology transfer, strengthening operations, or evaluating an investment opportunity, InnoTech can help." label="Get in Touch" onClick={openConsultationModal} image="about-cta" />
+    <Section tint title="Our Commitment">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          [Atom, 'SCIENTIFIC RIGOR', 'Decisions grounded in product and process understanding.', 'text-blue-600'],
+          [Factory, 'MANUFACTURING REALITY', 'Strategies designed for actual equipment, sites, people, systems and supply constraints.', 'text-emerald-600'],
+          [Settings, 'PRACTICAL EXECUTION', 'Plans structured around real milestones, owners, evidence and decisions.', 'text-amber-500'],
+          [TrendingUp, 'COMMERCIAL PERSPECTIVE', 'Technical decisions evaluated in context of timing, risk, cost, launch and lifecycle performance.', 'text-violet-600'],
+        ].map(([Icon, t, d, c], i) => {
+          const I = Icon as React.ComponentType<{ className?: string }>;
+          return <AnimateOnScroll key={t as string} type="fade-up" delay={i * 0.07}><TintTile tint={TINTS[i]} title={t as string} text={d as string} icon={<I className={`h-9 w-9 ${c}`} />} /></AnimateOnScroll>;
+        })}
+      </div>
+    </Section>
+
+    <section className="bg-white py-10 sm:py-14">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <SectionHead title="Leadership Grounded in the Product Lifecycle" />
+        <div className="mt-7 grid items-center gap-8 lg:grid-cols-[220px_1fr_380px]">
+          <img src={img('ab2-1')} alt="Raj Thota, Founder & Principal Advisor" loading="lazy" className="mx-auto w-48 rounded-xl object-cover shadow lg:w-full" />
+          <div>
+            <h3 className={`text-2xl font-black ${NAVY}`}>Raj Thota, <span className="text-base font-bold">MBA, MS (Pharmaceutics)</span></h3>
+            <p className="font-semibold italic text-[#27407A]">Founder &amp; Principal Advisor</p>
+            <p className="mt-3 text-sm sm:text-base text-[#27407A]">Founded by Raj Thota, with nearly three decades across Pharmaceutical Development, CMC, MS&amp;T, Technical Operations, global manufacturing, technology transfer, validation, site leadership, commercialization and executive advisory.</p>
+            <p className="mt-3 text-sm sm:text-base text-[#27407A]">His work spans not only strategy and advisory support, but direct technical program leadership and execution across development, scale-up, technology transfer, manufacturing, validation, and lifecycle management.</p>
+            <BtnPrimary tone="green" onClick={() => navigate('/our-founder')} className="mt-4">Meet the Founder</BtnPrimary>
+          </div>
+          <div className="rounded-xl bg-[#EAF3FC] p-4">
+            <h4 className={`mb-3 text-sm font-extrabold ${NAVY}`}>Selected Career Experience</h4>
+            <div className="grid grid-cols-2 gap-2.5">
+              {STATS.map(([n, l], i) => <div key={n} className={`rounded-lg border border-white/70 px-2 py-3 text-center ${TINTS[i]}`}><CountUp value={n} className={`block text-2xl font-black ${NAVY}`} /><span className="text-xs font-semibold text-[#27407A]">{l}</span></div>)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <Cta image="ab1-10" title="Let’s Discuss Your Program" text="Whether you need technical advice, CMC development support, project leadership, on-site execution, or commercialization support, InnoTech can help." label="Get in Touch" onClick={() => navigate('/contact-us')} />
   </div>
 );

@@ -5,9 +5,9 @@ import { AnimateOnScroll } from '../components/AnimateOnScroll';
 const OTHERS: [string, string, string][] = [
   ['Virtual / Externally Manufactured Companies', 'Function as an experienced extension of the technical organization, coordinating CMC, CDMOs, manufacturing partners and critical technical milestones.', 'ab3-2'],
   ['Established Pharmaceutical Organizations', 'Strengthen MS&T, Technical Operations, technology transfer, launch readiness, lifecycle performance or transformation.', 'ab3-3'],
-  ['CDMOs & Manufacturing Organizations', 'Improve transfer readiness, process stewardship, technical governance, validation readiness, and customer delivery.', 'ab3-3a'],
+  ['CDMOs & Manufacturing Organizations', 'Improve transfer readiness, process stewardship, technical governance, validation readiness, and customer delivery.', 'con-22'],
   ['Investors, Boards & Transaction Teams', 'Understand technical risk, manufacturing readiness, commercialization exposure and value-creation priorities.', 'ab3-4'],
-  ['Technology & AI Companies Serving Pharma', 'Translate pharmaceutical workflows, GxP expectations, and commercialization needs into useful digital solutions.', 'ab3-5'],
+  ['Technology & AI Companies Serving Pharma', 'Translate pharmaceutical workflows, GxP expectations, and commercialization needs into useful digital solutions.', 'svc-15'],
 ];
 const ENGAGE = [
   'A product or formulation needs a practical CMC development path.', 'Internal technical resources are limited or a program needs experienced project leadership.',
@@ -71,6 +71,6 @@ export const OurPartnersPage: React.FC<{ navigate: (r: string) => void; openCons
       </div>
     </Section>
 
-    <Cta image="ab3-6" title={<>Let’s Build Your <span className="text-cyan-300">Commercialization Success</span> Together</>} text="Whether you need technical advice, CMC development support, project leadership, on-site execution, or commercialization support, InnoTech can help." label="Get in Touch" onClick={() => navigate('/contact-us')} />
+    <Cta image="ab1-2" title={<>Let’s Build Your <span className="text-cyan-300">Commercialization Success</span> Together</>} text="Whether you need technical advice, CMC development support, project leadership, on-site execution, or commercialization support, InnoTech can help." label="Get in Touch" onClick={() => navigate('/contact-us')} />
   </div>
 );

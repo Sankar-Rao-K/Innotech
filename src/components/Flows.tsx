@@ -210,31 +210,17 @@ export const LeadershipSteps: React.FC<{ items: { label: string; desc: string }[
   );
 };
 
-/* ---------- SERVICES 02: running highlight along a chevron strip ---------- */
-export const ChevronRun: React.FC<{ items: string[] }> = ({ items }) => {
+/* ---------- Arrow strip with a running highlight. `fill` stretches it to the full width of its row (single flow). ---------- */
+export const ChevronRun: React.FC<{ items: string[]; fill?: boolean }> = ({ items, fill }) => {
   const [ref, seen] = useInView<HTMLDivElement>(0.4);
-  const [active] = useCycle(items.length, seen, 900);
+  const [active] = useCycle(items.length, seen, 1000);
   return (
-    <div ref={ref} className="flex flex-wrap gap-y-1.5">
+    <div ref={ref} className={fill ? 'flex w-full flex-wrap gap-y-1.5 lg:flex-nowrap' : 'flex flex-wrap gap-y-1.5'}>
       {items.map((t, i) => (
-        <span key={t} className="relative inline-flex h-10 items-center justify-center px-5 text-[11px] font-extrabold tracking-wide text-white transition-all duration-300" style={{ background: PALETTE[i % PALETTE.length], clipPath: chevron(i === 0, 10), marginLeft: i ? -4 : 0, opacity: seen ? (i === active ? 1 : 0.45) : 0, transform: i === active ? 'translateY(-3px) scale(1.06)' : 'none', zIndex: i === active ? 2 : 1, transitionDelay: seen ? '0ms' : `${i * 90}ms` }}>{t}</span>
+        <span key={t} className={`relative inline-flex items-center justify-center text-center font-extrabold text-white transition-all duration-300 ${fill ? 'h-14 min-w-[96px] flex-1 px-3 text-[10.5px] leading-tight tracking-wide lg:min-w-0 xl:text-[11px]' : 'h-10 px-5 text-[11px] tracking-wide'}`}
+          style={{ background: PALETTE[i % PALETTE.length], clipPath: chevron(i === 0, fill ? 12 : 10), marginLeft: i ? -4 : 0, opacity: seen ? (i === active ? 1 : 0.5) : 0, transform: i === active ? 'translateY(-3px) scale(1.04)' : 'none', zIndex: i === active ? 2 : 1, transitionDelay: seen ? '0ms' : `${i * 90}ms` }}>{t}</span>
       ))}
     </div>
-  );
-};
-
-/* ---------- SERVICES 04: pills with loading bars ---------- */
-export const ProgressPills: React.FC<{ items: string[] }> = ({ items }) => {
-  const [ref, seen] = useInView<HTMLOListElement>(0.4);
-  return (
-    <ol ref={ref} className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-      {items.map((t, i) => (
-        <li key={t} className="relative rounded-lg bg-[#EAF6FD] px-3 py-3 text-[11px] font-extrabold text-[#123B5D] overflow-hidden">
-          <span className="absolute inset-y-0 left-0 bg-gradient-to-r from-sky-300/70 to-emerald-300/70 transition-all ease-out" style={{ width: seen ? '100%' : '0%', transitionDuration: '900ms', transitionDelay: `${i * 420}ms` }} />
-          <span className="relative">{i + 1}. {t}</span>
-        </li>
-      ))}
-    </ol>
   );
 };
 

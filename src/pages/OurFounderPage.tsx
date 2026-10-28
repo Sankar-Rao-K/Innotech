@@ -49,8 +49,7 @@ export const OurFounderPage: React.FC<{ navigate: (r: string) => void; openConsu
       <p className="mx-auto mt-8 max-w-3xl text-center text-sm sm:text-base text-[#27407A]">This progression created an enterprise perspective on converting development knowledge into process capability, manufacturing systems, organizational readiness and reliable supply.</p>
     </Section>
 
-    <section className="relative overflow-hidden bg-[#EAF3FC] py-10 sm:py-14">
-      <img src={img('ab3-3a')} alt="" aria-hidden="true" className="absolute inset-y-0 right-0 h-full w-2/3 object-cover opacity-25 [mask-image:linear-gradient(to_right,transparent,#000)] [-webkit-mask-image:linear-gradient(to_right,transparent,#000)]" />
+    <section className="relative overflow-hidden bg-gradient-to-r from-[#EAF3FC] via-[#F4F9FE] to-[#E3EFFA] py-10 sm:py-14">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHead title="Selected Career Impact" />
         <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-5">
@@ -92,12 +91,14 @@ export const OurFounderPage: React.FC<{ navigate: (r: string) => void; openConsu
           <p className="text-sm sm:text-base text-[#27407A]">Raj&rsquo;s current thought leadership focuses on Enterprise Commercialization, Quality by Design, AI-assisted pharmaceutical development and technology transfer, Technical Operations, sterile ophthalmics, drug-device combination products, technical due diligence and executive capability building.</p>
           <BtnPrimary onClick={() => navigate('/insights')} className="mt-5">Explore Insights &amp; Resources</BtnPrimary>
         </div>
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+        <ul className="grid grid-cols-2 items-stretch gap-4 sm:grid-cols-3 xl:grid-cols-5">
           {THOUGHT.map(([t, im, to]) => (
-            <li key={t}>
-              <button onClick={() => navigate(to)} className="group block h-full w-full overflow-hidden rounded-lg border border-[#D7EAF7] bg-white text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
-                <img src={img(im)} alt="" loading="lazy" className="aspect-square w-full object-cover" />
-                <span className={`block p-2.5 text-[12.5px] font-extrabold leading-snug ${NAVY} group-hover:text-blue-600`}>{t}</span>
+            <li key={t} className="flex">
+              <button onClick={() => navigate(to)} className="group flex w-full flex-col text-left transition-transform duration-300 ease-out hover:-translate-y-3 focus-visible:-translate-y-3 focus:outline-none">
+                <span className="block overflow-hidden rounded-xl border border-[#D7EAF7] bg-white shadow-sm transition-shadow duration-300 group-hover:shadow-2xl group-focus-visible:shadow-2xl">
+                  <img src={img(im)} alt={`Cover: ${t}`} loading="lazy" className="aspect-[8/9] w-full bg-white object-contain" />
+                </span>
+                <span className={`mt-3 block min-h-[3.9rem] text-[13px] font-extrabold leading-snug ${NAVY} transition-colors group-hover:text-blue-600`}>{t}</span>
               </button>
             </li>
           ))}
@@ -105,6 +106,6 @@ export const OurFounderPage: React.FC<{ navigate: (r: string) => void; openConsu
       </div>
     </Section>
 
-    <Cta image="ab2-9" title="Let’s Discuss Your Program" text="Whether you need technical advice, CMC development support, project leadership, on-site execution, or commercialization support, InnoTech can help." label="Get in Touch" onClick={() => navigate('/contact-us')} />
+    <Cta image="exp-12" title="Let’s Discuss Your Program" text="Whether you need technical advice, CMC development support, project leadership, on-site execution, or commercialization support, InnoTech can help." label="Get in Touch" onClick={() => navigate('/contact-us')} />
   </div>
 );

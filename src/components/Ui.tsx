@@ -47,7 +47,7 @@ export const Hero: React.FC<HeroProps> = ({ eyebrow, title, sub, children, actio
     return (
       <section className="relative overflow-hidden bg-gradient-to-br from-[#08224D] via-[#0B2A5B] to-[#0F4C8A] text-white">
         {image && <img src={img(image)} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-25" />}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 grid gap-10 items-center lg:grid-cols-2">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 grid gap-10 items-center lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
           <div className="max-w-xl">
             <h1 className="text-3xl sm:text-5xl font-black leading-tight">{title}</h1>
             {sub && <p className="text-lg sm:text-2xl font-bold text-cyan-300 mt-3">{sub}</p>}

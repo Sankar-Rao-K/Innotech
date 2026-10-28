@@ -4,8 +4,11 @@ import { Hero, SectionHead, Cta, Arrow, img, NAVY } from '../components/Ui';
 import { AnimateOnScroll } from '../components/AnimateOnScroll';
 import { RESOURCES, TOPICS, TABS, Tab, Resource, tabMatches, bySlug, formatDate, FEATURED_MAIN, FEATURED_SIDE, PUBLICATION_ROW, ARTICLE_ROW, LATEST, findResource } from '../data/publications';
 
-const Thumb: React.FC<{ r: Resource; className?: string }> = ({ r, className = '' }) => (
-  <img src={img(r.image)} alt={r.style === 'book' ? `Cover of ${r.title}` : ''} loading="lazy" className={`w-full object-cover ${r.style === 'book' ? 'aspect-[4/5] object-top' : 'aspect-[16/10]'} ${className}`} />
+/** Book covers are shown whole (contain); photographs fill their frame (cover). */
+const Thumb: React.FC<{ r: Resource; className?: string; natural?: boolean }> = ({ r, className = '', natural }) => (
+  r.style === 'book'
+    ? <img src={img(r.image)} alt={`Cover of ${r.title}`} loading="lazy" className={`w-full bg-[#EEF4FB] ${natural ? 'h-auto' : 'aspect-square object-contain'} ${className}`} />
+    : <img src={img(r.image)} alt="" loading="lazy" className={`aspect-[16/10] w-full object-cover ${className}`} />
 );
 const KindTag: React.FC<{ r: Resource }> = ({ r }) => <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600">{r.kind}{r.date ? ` · ${formatDate(r.date)}` : ''}</span>;
 
@@ -33,11 +36,11 @@ export const BlogsPage: React.FC<{ navigate: (r: string) => void; openConsultati
 
   return (
     <div className="font-sans bg-white">
-      <Hero variant="dark" image="ins-23" title="Insights & Resources" sub="Connecting Science, Development, Manufacturing and Commercialization"
+      <Hero variant="dark" title="Insights & Resources" sub="Connecting Science, Development, Manufacturing and Commercialization"
         aside={
-          <div className="relative flex h-60 items-center justify-center sm:h-72">
-            {['ins-7', 'ins-6', 'ins-9', 'ins-10'].map((im, i) => (
-              <img key={im} src={img(im)} alt="" aria-hidden="true" className="absolute aspect-[4/5] w-28 rounded-md border border-white/30 object-cover shadow-2xl sm:w-36 lg:w-40" style={{ left: `calc(50% + ${(i - 1.5) * 64}px - 4.5rem)`, transform: `rotate(${(i - 1.5) * 5}deg) translateY(${Math.abs(i - 1.5) * 6}px)`, zIndex: i }} />
+          <div className="flex flex-wrap items-end justify-center gap-x-4 gap-y-5 sm:flex-nowrap sm:gap-x-5 lg:gap-x-7" aria-hidden="true">
+            {(['ins-7', 'ins-6', 'ins-9', 'ins-10'] as const).map((im, i) => (
+              <img key={im} src={img(im)} alt="" className="h-auto w-[44%] max-w-[210px] rounded-md border border-white/25 shadow-2xl transition-transform duration-300 hover:-translate-y-3 sm:w-1/4" style={{ marginBottom: [0, 18, 6, 22][i] }} />
             ))}
           </div>
         }>
@@ -62,7 +65,7 @@ export const BlogsPage: React.FC<{ navigate: (r: string) => void; openConsultati
         <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,3fr)]">
           <AnimateOnScroll type="fade-up">
             <button onClick={() => open(main.slug)} className="group grid h-full w-full gap-4 rounded-xl border border-[#D7EAF7] bg-white p-4 text-left shadow-sm transition-shadow hover:shadow-lg sm:grid-cols-[170px_1fr] lg:grid-cols-1 xl:grid-cols-[150px_1fr]">
-              <Thumb r={main} className="mx-auto max-w-[220px] rounded-md shadow lg:max-w-none" />
+              <Thumb r={main} natural className="mx-auto max-w-[220px] rounded-md shadow lg:max-w-none" />
               <span className="flex flex-col">
                 <span className="w-fit rounded bg-emerald-500 px-2 py-0.5 text-[10px] font-extrabold text-white">FEATURED</span>
                 <span className={`mt-2 text-lg font-black leading-snug ${NAVY}`}>Good AI Practice</span>
@@ -174,7 +177,7 @@ export const BlogsPage: React.FC<{ navigate: (r: string) => void; openConsultati
               {list.map(r => (
                 <li key={r.slug}>
                   <button onClick={() => open(r.slug)} className="group flex h-full w-full flex-col overflow-hidden rounded-xl border border-[#D7EAF7] bg-white text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
-                    <img src={img(r.image)} alt="" loading="lazy" className="h-40 w-full object-cover" style={r.style === 'book' ? { objectPosition: 'top' } : undefined} />
+                    {r.style === 'book' ? <img src={img(r.image)} alt={`Cover of ${r.title}`} loading="lazy" className="aspect-square w-full bg-[#EEF4FB] object-contain" /> : <img src={img(r.image)} alt="" loading="lazy" className="aspect-[16/10] w-full object-cover" />}
                     <span className="flex flex-1 flex-col p-3.5"><KindTag r={r} /><span className={`mt-1 text-sm font-extrabold leading-snug ${NAVY} group-hover:text-blue-600`}>{r.title}</span><span className="mt-1.5 line-clamp-3 text-xs text-[#27407A]">{r.summary}</span>
                       <span className={`mt-auto inline-flex items-center gap-1 pt-2.5 text-xs font-extrabold ${NAVY}`}>{r.pdf ? 'Read & download PDF' : 'View details'} <ArrowRight className="h-3 w-3" /></span></span>
                   </button>

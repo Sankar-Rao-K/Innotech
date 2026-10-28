@@ -45,7 +45,7 @@ export const OurExpertisePage: React.FC<{ navigate: (r: string) => void; openCon
       <div className="mx-auto max-w-7xl space-y-3 px-4 py-8 sm:px-6 lg:px-8">
         {ITEMS.map(it => (
           <AnimateOnScroll key={it.id} type="fade-up">
-            <section id={it.id} className="grid scroll-mt-36 items-center gap-5 border-b border-[#D7EAF7] py-6 md:grid-cols-[minmax(0,1fr)_minmax(0,0.62fr)] md:gap-8">
+            <section id={it.id} className="grid scroll-mt-36 items-center gap-5 border-b border-[#D7EAF7] py-6 md:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] md:gap-8">
               <div>
                 <span className="mb-2 block h-0.5 w-10 bg-emerald-500" />
                 <h2 className={`text-xl font-black leading-tight sm:text-2xl ${NAVY}`}>{it.title}</h2>
@@ -53,7 +53,7 @@ export const OurExpertisePage: React.FC<{ navigate: (r: string) => void; openCon
                 <p className="mt-2 text-sm leading-relaxed text-[#27407A] sm:text-base">{it.body}</p>
                 <button onClick={() => learn(it)} className={`group mt-3 inline-flex items-center gap-1.5 text-sm font-extrabold ${NAVY} hover:text-blue-600`}>Learn More <Arrow className="transition-transform group-hover:translate-x-1" /></button>
               </div>
-              <img src={img(it.image)} alt={it.title} loading="lazy" className="h-48 w-full rounded-xl object-cover shadow-sm sm:h-56" />
+              <img src={img(it.image)} alt={it.title} loading="lazy" className="h-auto w-full rounded-xl shadow-sm" />
             </section>
           </AnimateOnScroll>
         ))}

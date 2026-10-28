@@ -27,7 +27,7 @@ export const BlogDetailPage: React.FC<Props> = ({ slug, navigate, openConsultati
     <div className="bg-white font-sans text-[#27407A]">
       <section className="bg-gradient-to-br from-[#08224D] via-[#0A2463] to-[#0F4C8A] text-white">
         <div className={`mx-auto grid max-w-7xl items-center gap-8 px-4 py-10 sm:px-6 lg:px-8 lg:py-14 ${r.style === 'book' ? 'md:grid-cols-[220px_1fr]' : 'md:grid-cols-[360px_1fr]'}`}>
-          <img src={img(r.image)} alt={r.style === 'book' ? `Cover of ${r.title}` : ''} className={`mx-auto w-full rounded-lg border border-white/20 object-cover shadow-2xl ${r.style === 'book' ? 'max-w-[200px] aspect-[4/5] object-top md:max-w-none' : 'max-w-md aspect-[16/10]'}`} />
+          <img src={img(r.image)} alt={r.style === 'book' ? `Cover of ${r.title}` : ''} className={`mx-auto w-full rounded-lg border border-white/20 shadow-2xl ${r.style === 'book' ? 'h-auto max-w-[220px] bg-[#EEF4FB] md:max-w-none' : 'aspect-[16/10] max-w-md object-cover'}`} />
           <div>
             <button onClick={() => navigate('/insights')} className="mb-3 inline-flex items-center gap-1.5 text-xs font-bold text-blue-200 hover:text-white"><ArrowLeft className="h-3.5 w-3.5" /> Insights &amp; Resources</button>
             <p className="text-[11px] font-extrabold uppercase tracking-widest text-emerald-300">{r.kind}</p>
@@ -86,7 +86,7 @@ export const BlogDetailPage: React.FC<Props> = ({ slug, navigate, openConsultati
           <div className="grid gap-4 md:grid-cols-3">
             {related.map(x => (
               <button key={x.slug} onClick={() => navigate(`/insights/${x.slug}`)} className="group flex gap-3 rounded-xl border border-[#D7EAF7] bg-white p-3 text-left transition-shadow hover:shadow-lg">
-                <img src={img(x.image)} alt="" loading="lazy" className="h-20 w-20 shrink-0 rounded object-cover" style={x.style === 'book' ? { objectPosition: 'top' } : undefined} />
+                <img src={img(x.image)} alt="" loading="lazy" className={`h-20 w-20 shrink-0 rounded ${x.style === 'book' ? 'bg-[#EEF4FB] object-contain' : 'object-cover'}`} />
                 <span><span className="block text-[10px] font-extrabold uppercase tracking-wider text-emerald-600">{x.kind}</span><span className="block text-sm font-bold leading-snug text-[#0A2A7A] group-hover:text-blue-600">{x.title}</span></span>
               </button>
             ))}
@@ -94,7 +94,7 @@ export const BlogDetailPage: React.FC<Props> = ({ slug, navigate, openConsultati
         </div></section>
       )}
 
-      <Cta image="ins-25" title={<>From Insight to <span className="text-cyan-300">Execution</span></>} text="The same thinking can be applied through CMC development support, project leadership, technology transfer, on-site technical support and readiness assessment." label="Discuss Your Project" onClick={openConsultationModal} />
+      <Cta image="exp-10" title={<>From Insight to <span className="text-cyan-300">Execution</span></>} text="The same thinking can be applied through CMC development support, project leadership, technology transfer, on-site technical support and readiness assessment." label="Discuss Your Project" onClick={openConsultationModal} />
     </div>
   );
 };

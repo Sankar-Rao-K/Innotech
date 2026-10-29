@@ -8,7 +8,7 @@ import { RESOURCES, TOPICS, TABS, Tab, Resource, tabMatches, bySlug, formatDate,
 const Thumb: React.FC<{ r: Resource; className?: string; natural?: boolean }> = ({ r, className = '', natural }) => (
   r.style === 'book'
     ? <img src={img(r.image)} alt={`Cover of ${r.title}`} loading="lazy" className={`w-full bg-[#EEF4FB] ${natural ? 'h-auto' : 'aspect-square object-contain'} ${className}`} />
-    : <img src={img(r.image)} alt="" loading="lazy" className={`aspect-[16/10] w-full object-cover ${className}`} />
+    : <img src={img(r.image)} alt="" loading="lazy" className={`aspect-square w-full object-cover ${className}`} />
 );
 const KindTag: React.FC<{ r: Resource }> = ({ r }) => <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600">{r.kind}{r.date ? ` · ${formatDate(r.date)}` : ''}</span>;
 
@@ -38,9 +38,11 @@ export const BlogsPage: React.FC<{ navigate: (r: string) => void; openConsultati
     <div className="font-sans bg-white">
       <Hero variant="dark" title="Insights & Resources" sub="Connecting Science, Development, Manufacturing and Commercialization"
         aside={
-          <div className="flex flex-wrap items-end justify-center gap-x-4 gap-y-5 sm:flex-nowrap sm:gap-x-5 lg:gap-x-7" aria-hidden="true">
+          <div className="relative mx-auto aspect-[2/1] w-full max-w-[640px]" aria-hidden="true">
             {(['ins-7', 'ins-6', 'ins-9', 'ins-10'] as const).map((im, i) => (
-              <img key={im} src={img(im)} alt="" className="h-auto w-[44%] max-w-[210px] rounded-md border border-white/25 shadow-2xl transition-transform duration-300 hover:-translate-y-3 sm:w-1/4" style={{ marginBottom: [0, 18, 6, 22][i] }} />
+              <div key={im} className={`absolute w-[29.5%] hover:z-30 ${['z-[1]', 'z-[2]', 'z-[3]', 'z-[4]'][i]}`} style={{ left: `${i * 23.5}%`, bottom: [0, 6, 1, 7][i] + '%', transform: `rotate(${(i - 1.5) * 4}deg)` }}>
+                <img src={img(im)} alt="" className="h-auto w-full rounded-md border border-white/25 shadow-2xl transition-transform duration-300 hover:-translate-y-4" />
+              </div>
             ))}
           </div>
         }>
@@ -177,7 +179,7 @@ export const BlogsPage: React.FC<{ navigate: (r: string) => void; openConsultati
               {list.map(r => (
                 <li key={r.slug}>
                   <button onClick={() => open(r.slug)} className="group flex h-full w-full flex-col overflow-hidden rounded-xl border border-[#D7EAF7] bg-white text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
-                    {r.style === 'book' ? <img src={img(r.image)} alt={`Cover of ${r.title}`} loading="lazy" className="aspect-square w-full bg-[#EEF4FB] object-contain" /> : <img src={img(r.image)} alt="" loading="lazy" className="aspect-[16/10] w-full object-cover" />}
+                    {r.style === 'book' ? <img src={img(r.image)} alt={`Cover of ${r.title}`} loading="lazy" className="aspect-square w-full bg-[#EEF4FB] object-contain" /> : <img src={img(r.image)} alt="" loading="lazy" className="aspect-square w-full object-cover" />}
                     <span className="flex flex-1 flex-col p-3.5"><KindTag r={r} /><span className={`mt-1 text-sm font-extrabold leading-snug ${NAVY} group-hover:text-blue-600`}>{r.title}</span><span className="mt-1.5 line-clamp-3 text-xs text-[#27407A]">{r.summary}</span>
                       <span className={`mt-auto inline-flex items-center gap-1 pt-2.5 text-xs font-extrabold ${NAVY}`}>{r.pdf ? 'Read & download PDF' : 'View details'} <ArrowRight className="h-3 w-3" /></span></span>
                   </button>

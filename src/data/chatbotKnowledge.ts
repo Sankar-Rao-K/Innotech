@@ -1,6 +1,6 @@
 // InnoTech BioPharm Solutions: chatbot knowledge base (runs fully in the browser, no external API).
 import { COMPANY_DETAILS } from './siteData';
-import { RESOURCES } from './publications';
+import { RESOURCES, LATEST } from './publications';
 
 export interface KBEntry {
   id: string;
@@ -90,7 +90,7 @@ export const ENTRIES: KBEntry[] = [
     answer: `**Insights & Resources** has ${RESOURCES.length} resources: white papers, executive guides, playbooks, a learning series, a framework, and technical articles & perspectives by Raj Thota. ${RESOURCES.filter(r => r.pdf).length} are available to read or download as PDFs now; the others are available on request.`,
     route: '/insights', routeLabel: 'Browse Insights & Resources', follow: ['Show me white papers', 'Latest publications', 'CDMO selection guide'] },
   { id: 'latest', keywords: ['latest', 'newest', 'recent', 'new publications', 'latest publications'],
-    answer: 'Latest perspectives:\n' + ['why-commercialization-risk-should-be-visible-before-launch', 'technology-transfer-is-not-the-movement-of-documents', 'start-with-the-pharmaceutical-problem-not-the-ai-technology'].map(s => `• ${RESOURCES.find(r => r.slug === s)!.title}`).join('\n'),
+    answer: 'Latest perspectives:\n' + LATEST.map(s => `• ${RESOURCES.find(r => r.slug === s)!.title}`).join('\n'),
     route: '/insights', routeLabel: 'Browse Insights & Resources' },
   { id: 'whitepapers', keywords: ['show me white papers', 'list white papers', 'all white papers'],
     answer: 'White papers:\n' + RESOURCES.filter(r => r.kind === 'White Paper').map(r => `• ${r.title}`).join('\n'),

@@ -50,4 +50,4 @@ export const FEATURED_MAIN = 'good-ai-practice';
 export const FEATURED_SIDE = ['evolution-of-qbd', 'investor-technical-due-diligence', 'commercializing-sterile-ophthalmic-eye-drops', 'small-molecules-to-biologics', 'enterprise-commercialization'];
 export const PUBLICATION_ROW = ['evolution-of-qbd', 'good-ai-practice', 'investor-technical-due-diligence', 'commercializing-sterile-ophthalmic-eye-drops', 'small-molecules-to-biologics', 'cmc-pitfalls-biotech', 'selecting-cmo-cdmo', 'drug-device-combination-products'];
 export const ARTICLE_ROW = ['why-commercialization-risk-should-be-visible-before-launch', 'osmotic-delivery-qbd', 'technology-transfer-is-not-the-movement-of-documents', 'ocular-drug-delivery'];
-export const LATEST = ['why-commercialization-risk-should-be-visible-before-launch', 'technology-transfer-is-not-the-movement-of-documents', 'start-with-the-pharmaceutical-problem-not-the-ai-technology'];
+export const LATEST = ['start-with-the-pharmaceutical-problem-not-the-ai-technology', 'ai-revolutionizing-biopharma', 'complex-generic-shortage'];
